@@ -28,5 +28,6 @@ public class HttpChatGuiceServletModule extends AbstractModule {
         bind(ContactResource.class).in(Singleton.class);
         bind(ContactsResource.class).in(Singleton.class);
         bind(AlertsResource.class).in(Singleton.class);
+        bind(MessageResource.class).in(Singleton.class);
     }
 }

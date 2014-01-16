@@ -72,18 +72,18 @@ public class ProfileResource {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON})
-    public Response updateProfile(@HeaderParam("x-httpchat-userid") Long id, UpdateProfileRequest request) {
+    public Response updateProfile(@HeaderParam("x-httpchat-userid") Long id, Profile profile) {
         StatusResponse resp = null;
-        Profile profile = request.getProfile();
         if (profile == null) {
-            resp = new StatusResponse(HttpStatus.SC_BAD_REQUEST, "Missing required field[profile].");
+            resp = new StatusResponse(HttpStatus.SC_BAD_REQUEST, "Missing required profile information.");
         } else if (StringUtils.isEmpty(profile.getFullname())) {
             resp = new StatusResponse(HttpStatus.SC_BAD_REQUEST, "Missing required field[username].");
         }
 
         if (resp == null) {
             ResponseEvent<StatusResponse> respEvent =
-                    businessLogic.processUpdateProfile(new RequestEvent<UpdateProfileRequest>(id, request));
+                    businessLogic.processUpdateProfile(new RequestEvent<UpdateProfileRequest>(id,
+                            new UpdateProfileRequest(profile)));
             resp = respEvent.getResponse();
         }
 

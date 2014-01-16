@@ -4,15 +4,14 @@ import com.google.inject.Inject;
 import com.googlecode.objectify.Ref;
 import com.home911.httpchat.exception.*;
 import com.home911.httpchat.model.*;
+import com.home911.httpchat.model.Message;
+import com.home911.httpchat.service.message.MessageService;
 import com.home911.httpchat.service.notification.NotificationService;
 import com.home911.httpchat.service.user.UserService;
 import com.home911.httpchat.service.userinfo.UserInfoService;
 import com.home911.httpchat.servlet.event.RequestEvent;
 import com.home911.httpchat.servlet.event.ResponseEvent;
-import com.home911.httpchat.servlet.model.Alert;
-import com.home911.httpchat.servlet.model.Contact;
-import com.home911.httpchat.servlet.model.ContactFilterType;
-import com.home911.httpchat.servlet.model.Profile;
+import com.home911.httpchat.servlet.model.*;
 import com.home911.httpchat.servlet.primitive.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -33,13 +32,15 @@ public class BusinessLogicImpl implements BusinessLogic {
     private final UserService userService;
     private final UserInfoService userInfoService;
     private final NotificationService notificationService;
+    private final MessageService messageService;
 
     @Inject
     public BusinessLogicImpl(UserService userService, UserInfoService userInfoService,
-                             NotificationService notificationService) {
+                             NotificationService notificationService, MessageService messageService) {
         this.userService = userService;
         this.userInfoService = userInfoService;
         this.notificationService = notificationService;
+        this.messageService = messageService;
     }
 
     //@Transaction(TxnType.REQUIRED)
@@ -336,11 +337,23 @@ public class BusinessLogicImpl implements BusinessLogic {
     public ResponseEvent<StatusResponse> processPoll(RequestEvent<PollRequest> requestEvent) {
         LOGGER.log(Level.INFO, "Processing poll request[" + requestEvent + "]");
         User user = userService.getUser(requestEvent.getUserId());
+        List<Message> messages = messageService.getMessages(user);
 
         StatusResponse resp = new StatusResponse(HttpStatus.SC_OK, "Poll successful");
         getOwnNotification(user, resp);
 
-        if (resp.getAlerts() == null || resp.getAlerts().isEmpty()) {
+        if (messages != null && !messages.isEmpty()) {
+            List<com.home911.httpchat.servlet.model.Message> msgs =
+                    new ArrayList<com.home911.httpchat.servlet.model.Message>(messages.size());
+            for (Message message : messages) {
+                msgs.add(new com.home911.httpchat.servlet.model.Message(message.getFrom().getId(), message.getText()));
+            }
+            resp.setMessages(msgs);
+            messageService.removeMessages(messages);
+        }
+
+        if ((resp.getAlerts() == null || resp.getAlerts().isEmpty()) &&
+                (resp.getMessages() == null || resp.getMessages().isEmpty())){
             resp = new StatusResponse(HttpStatus.SC_NO_CONTENT, "Poll successful");
         }
 
@@ -379,6 +392,21 @@ public class BusinessLogicImpl implements BusinessLogic {
 
         return new ResponseEvent<GetContactsResponse>(new GetContactsResponse(HttpStatus.SC_OK,
                 "Get Contacts successful", ownContacts));
+    }
+
+    public ResponseEvent<StatusResponse> processSendMessage(RequestEvent<SendMessageRequest> requestEvent) {
+        LOGGER.log(Level.INFO, "Processing sendMessage request[" + requestEvent + "]");
+        SendMessageRequest req = requestEvent.getRequest();
+        User user = userService.getUser(requestEvent.getUserId());
+        User to = userService.getUser(req.getMessage().getTo());
+
+        if (Presence.ONLINE == to.getPresence()) {
+            messageService.saveMessage(new Message(to, user, req.getMessage().getText()));
+            return new ResponseEvent<StatusResponse>(new StatusResponse(HttpStatus.SC_OK,
+                    "Send Message successful"));
+        } else {
+            throw new UserOfflineException();
+        }
     }
 
     private EnumSet<ContactSearchFilterField> getContactSearchFilter(EnumSet<ContactFilterType> filterTypes) {

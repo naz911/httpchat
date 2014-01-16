@@ -16,4 +16,5 @@ public interface BusinessLogic {
     public ResponseEvent<StatusResponse> processPoll(RequestEvent<PollRequest> requestEvent);
     public ResponseEvent<GetProfileResponse> processGetProfile(RequestEvent<GetProfileRequest> requestEvent);
     public ResponseEvent<GetContactsResponse> processGetContacts(RequestEvent<GetContactsRequest> requestEvent);
+    public ResponseEvent<StatusResponse> processSendMessage(RequestEvent<SendMessageRequest> requestEvent);
 }

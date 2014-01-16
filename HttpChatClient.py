@@ -2,6 +2,8 @@ import httplib
 import base64
 import json
 
+#HOST="myhttprestchat.appspot.com"
+#PORT=80
 HOST="localhost"
 PORT=8080
 IS_HTTPS="false";
@@ -85,7 +87,7 @@ class HttpChatClient(object):
         print 'generated userid is:' + self.currentUserIdB
 
     def saveProfileA(self):
-        request = '{"profile":{"fullname":"Benoit Houle"}}'
+        request = '{"fullname":"Benoit Houle"}'
         conn = self.getConnection()
         print 'Sending saveProfile A'
         conn.request("PUT", "/rest/secure/profile",
@@ -116,7 +118,7 @@ class HttpChatClient(object):
         print response.status, response.reason, response.getheaders(), body;
 
     def saveProfileB(self):
-        request = '{"profile":{"fullname":"Gringo Hull"}}'
+        request = '{"fullname":"Gringo Hull"}'
         conn = self.getConnection()
         print 'Sending saveProfile B'
         conn.request("PUT", "/rest/secure/profile?filterType=FULL",
@@ -310,6 +312,39 @@ class HttpChatClient(object):
         response = conn.getresponse()
         body = response.read()
         print response.status, response.reason, response.getheaders(), body;
+
+    def sendMessageA(self):
+        request = '{"to":"%s","text":"HelloWorld!"}' % (self.currentUserIdB)
+        conn = self.getConnection()
+        print 'Sending sendMessage A->B'
+        conn.request("PUT", "/rest/secure/message",
+                        request,
+                        {
+                            "Content-type" : "application/json",
+							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdA, self.currentTokenA))
+                        }
+                    ); 
+
+        response = conn.getresponse()
+        body = response.read()
+        print response.status, response.reason, response.getheaders(), body;
+
+    def sendMessageB(self):
+        request = '{"to":"%s","text":"HelloWorld!!!!"}' % (self.currentUserIdA)
+        conn = self.getConnection()
+        print 'Sending sendMessage B->A'
+        conn.request("PUT", "/rest/secure/message",
+                        request,
+                        {
+                            "Content-type" : "application/json",
+							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdB, self.currentTokenB))
+                        }
+                    ); 
+
+        response = conn.getresponse()
+        body = response.read()
+        print response.status, response.reason, response.getheaders(), body;
+
     def logoutA(self):
         request = ''
         conn = self.getConnection() 
@@ -341,23 +376,27 @@ class HttpChatClient(object):
         print response.status, response.reason, response.getheaders(), body;
 
 client = HttpChatClient()
-#client.registerA()
-#client.registerB()
+client.registerA()
+client.registerB()
 client.loginA()
 client.loginB()
-#client.saveProfileA()
-#client.getMyProfileA()
-#client.saveProfileB()
-#client.getMyProfileB()
-#client.getProfileA()
-#client.getProfileB()
-#client.searchContactsA()
-#client.searchContactsB()
-#client.inviteContactA()
-#client.pollB()
-#client.acceptContactInviteB()
-#client.pollA()
+client.saveProfileA()
+client.getMyProfileA()
+client.saveProfileB()
+client.getMyProfileB()
+client.getProfileA()
+client.getProfileB()
+client.searchContactsA()
+client.searchContactsB()
+client.inviteContactA()
+client.pollB()
+client.acceptContactInviteB()
+client.pollA()
 client.getContactsA()
 client.getContactsB()
+client.sendMessageA()
+client.sendMessageB()
+client.pollA()
+client.pollB()
 client.logoutA()
 client.logoutB()

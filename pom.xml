@@ -10,7 +10,7 @@
 
     <properties>
         <appengine.app.version>1</appengine.app.version>
-        <appengine.target.version>1.8.8</appengine.target.version>
+        <appengine.target.version>1.8.9</appengine.target.version>
 		<appengine.objectify.version>4.0rc2</appengine.objectify.version>
 		<google.guice.version>3.0</google.guice.version>
 		<google.gson.version>2.2.4</google.gson.version>
@@ -124,11 +124,11 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <version>2.5.1</version>
+                <version>3.1</version>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
 
