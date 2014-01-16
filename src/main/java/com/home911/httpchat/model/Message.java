@@ -5,14 +5,14 @@ import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
+import com.googlecode.objectify.annotation.Parent;
 
 @Entity
 public class Message {
     @Id
     private Long id;
-    @Index
+    @Parent
     private Key<User> to;
-    @Index
     private Ref<User> from;
     private String text;
 

@@ -26,19 +26,23 @@ public class UserServiceImpl implements UserService {
 
     public User getUser(String username, String password) {
         LOGGER.info("Getting user for username:[" + username + "] and password: [*******]");
-        SimpleQuery<User> query = ofy().load().type(User.class).filter("username", username)
+        SimpleQuery<User> query = ofy().transactionless().load().type(User.class).filter("username", username)
                 .filter("password", password).limit(1);
         LoadResult<User> result = query.first();
         User user = null;
         if (result != null) {
             user = result.now();
         }
+
+        if (user != null) {
+            user = getUser(user.getId());
+        }
         return user;
     }
 
     public boolean exists(String username) {
         LOGGER.info("Getting user for username:[" + username + "]");
-        SimpleQuery<User> query = ofy().load().type(User.class).filter("username", username).limit(1);
+        SimpleQuery<User> query = ofy().transactionless().load().type(User.class).filter("username", username).limit(1);
         return query.count() >= 1;
     }
 

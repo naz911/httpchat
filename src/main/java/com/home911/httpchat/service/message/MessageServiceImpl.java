@@ -4,7 +4,6 @@ import com.google.appengine.api.datastore.QueryResultIterator;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.cmd.Query;
 import com.home911.httpchat.model.Message;
-import com.home911.httpchat.model.Notification;
 import com.home911.httpchat.model.User;
 
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ public class MessageServiceImpl implements MessageService {
     public List<Message> getMessages(User to) {
         LOGGER.info("Getting messages for owner[" + to + "]");
         List<Message> messages = new ArrayList<Message>();
-        Query<Message> query = ofy().load().type(Message.class).filter("to", to);
+        Query<Message> query = ofy().load().type(Message.class).ancestor(to);
         QueryResultIterator<Message> iterator = query.iterator();
         while (iterator.hasNext()) {
             messages.add(iterator.next());
@@ -41,7 +40,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void removeMessages(List<Message> messages) {
+    public void removeMessages(User owner, List<Message> messages) {
         LOGGER.info("Removing messages [" + messages + "]");
         //ofy().delete().entities(new Notification[notifications.size()]).now();
         List<Long> ids = new ArrayList<Long>(messages.size());
@@ -49,7 +48,7 @@ public class MessageServiceImpl implements MessageService {
             ids.add(message.getId());
         }
 
-        ofy().delete().type(Notification.class).ids(ids);
+        ofy().delete().type(Message.class).parent(owner).ids(ids);
     }
 
     @Override

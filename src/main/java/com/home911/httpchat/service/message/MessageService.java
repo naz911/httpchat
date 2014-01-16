@@ -8,6 +8,6 @@ import java.util.List;
 public interface MessageService {
     public Message getMessage(Long id);
     public List<Message> getMessages(User to);
-    public void removeMessages(List<Message> messages);
+    public void removeMessages(User owner, List<Message> messages);
     public void saveMessage(Message message);
 }

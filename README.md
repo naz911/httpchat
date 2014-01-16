@@ -33,6 +33,7 @@ Libraries/Dependencies:
     Guice
     GSON
     RestEasy
+    Transaction (AOP)
 
 Requires [Apache Maven](http://maven.apache.org) 3.0 or greater, and JDK 6+ in order to run.
 

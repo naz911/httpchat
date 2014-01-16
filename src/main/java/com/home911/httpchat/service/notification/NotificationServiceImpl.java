@@ -21,17 +21,17 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Notification getNotification(Long id) {
+    public Notification getNotification(User owner, Long id) {
         LOGGER.info("Getting notification for id:[" + id + "]");
-        Notification user = ofy().load().type(Notification.class).id(id).now();
-        return user;
+        Notification notification = ofy().load().type(Notification.class).parent(owner).id(id).now();
+        return notification;
     }
 
     @Override
     public List<Notification> getNotifications(User owner) {
         LOGGER.info("Getting notifications for owner[" + owner + "]");
         List<Notification> notifications = new ArrayList<Notification>();
-        Query<Notification> query = ofy().load().type(Notification.class).filter("owner", owner);
+        Query<Notification> query = ofy().load().type(Notification.class).ancestor(owner);
         QueryResultIterator<Notification> iterator = query.iterator();
         while (iterator.hasNext()) {
             notifications.add(iterator.next());
@@ -41,7 +41,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void removeNotifications(List<Notification> notifications) {
+    public void removeNotifications(User owner, List<Notification> notifications) {
         LOGGER.info("Removing notifications [" + notifications + "]");
         //ofy().delete().entities(new Notification[notifications.size()]).now();
         List<Long> ids = new ArrayList<Long>(notifications.size());
@@ -49,7 +49,7 @@ public class NotificationServiceImpl implements NotificationService {
             ids.add(notification.getId());
         }
 
-        ofy().delete().type(Notification.class).ids(ids);
+        ofy().delete().type(Notification.class).parent(owner).ids(ids);
     }
 
     @Override

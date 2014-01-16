@@ -1,12 +1,10 @@
 package com.home911.httpchat.model;
 
 import com.googlecode.objectify.Ref;
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Index;
-import com.googlecode.objectify.annotation.Load;
+import com.googlecode.objectify.annotation.*;
 
 @Entity
+@Cache
 public class User {
     @Id
     private Long id;

@@ -2,17 +2,16 @@ package com.home911.httpchat.model;
 
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-import com.googlecode.objectify.annotation.Index;
+import com.googlecode.objectify.annotation.*;
 
 import java.util.*;
 
 @Entity
+@Cache
 public class UserInfo {
     @Id
     private Long id;
-    @Index
+    @Parent
     private Key<User> owner;
     @Index
     private String fullname;

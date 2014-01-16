@@ -2,6 +2,7 @@ package com.home911.httpchat.service.logic;
 
 import com.google.inject.Inject;
 import com.googlecode.objectify.Ref;
+import com.googlecode.objectify.TxnType;
 import com.home911.httpchat.exception.*;
 import com.home911.httpchat.model.*;
 import com.home911.httpchat.model.Message;
@@ -13,6 +14,7 @@ import com.home911.httpchat.servlet.event.RequestEvent;
 import com.home911.httpchat.servlet.event.ResponseEvent;
 import com.home911.httpchat.servlet.model.*;
 import com.home911.httpchat.servlet.primitive.*;
+import com.home911.httpchat.transaction.Transaction;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.jboss.resteasy.util.Base64;
@@ -43,7 +45,7 @@ public class BusinessLogicImpl implements BusinessLogic {
         this.messageService = messageService;
     }
 
-    //@Transaction(TxnType.REQUIRED)
+    @Transaction(TxnType.REQUIRED)
     public ResponseEvent<LoginResponse> processLogin(RequestEvent<LoginRequest> requestEvent) {
         LOGGER.log(Level.INFO, "Processing login request[" + requestEvent + "]");
         LoginRequest req = requestEvent.getRequest();
@@ -149,7 +151,7 @@ public class BusinessLogicImpl implements BusinessLogic {
                     }
                 }
                 if (!notificationsToRemove.isEmpty()) {
-                    notificationService.removeNotifications(notificationsToRemove);
+                    notificationService.removeNotifications(user, notificationsToRemove);
                 }
             }
         }
@@ -157,7 +159,7 @@ public class BusinessLogicImpl implements BusinessLogic {
         return new ResponseEvent<StatusResponse>(new StatusResponse(HttpStatus.SC_OK, "Logout successful"));
     }
 
-    //@Transaction(TxnType.REQUIRED)
+    @Transaction(TxnType.REQUIRED)
     public ResponseEvent<StatusResponse> processRegister(RequestEvent<RegisterRequest> requestEvent) {
         LOGGER.log(Level.INFO, "Processing register request[" + requestEvent + "]");
         RegisterRequest req = requestEvent.getRequest();
@@ -175,7 +177,7 @@ public class BusinessLogicImpl implements BusinessLogic {
         return new ResponseEvent<StatusResponse>(new StatusResponse(HttpStatus.SC_OK, "Register successful"));
     }
 
-    //@Transaction(TxnType.REQUIRED)
+    @Transaction(TxnType.REQUIRED)
     public ResponseEvent<StatusResponse> processUpdateProfile(RequestEvent<UpdateProfileRequest> requestEvent) {
         LOGGER.log(Level.INFO, "Processing updateProfile request[" + requestEvent + "]");
         UpdateProfileRequest req = requestEvent.getRequest();
@@ -238,7 +240,7 @@ public class BusinessLogicImpl implements BusinessLogic {
         return new ResponseEvent<ContactSearchResponse>(resp);
     }
 
-    //@Transaction(TxnType.REQUIRED)
+    @Transaction(TxnType.REQUIRED)
     public ResponseEvent<StatusResponse> processContactInvite(RequestEvent<ContactInviteRequest> requestEvent) {
         LOGGER.log(Level.INFO, "Processing contactInvite request[" + requestEvent + "]");
         ContactInviteRequest req = requestEvent.getRequest();
@@ -281,12 +283,12 @@ public class BusinessLogicImpl implements BusinessLogic {
         }
     }
 
-    //@Transaction(TxnType.REQUIRED)
+    @Transaction(TxnType.REQUIRED)
     public ResponseEvent<StatusResponse> acceptContactInvite(RequestEvent<AcceptContactInviteRequest> requestEvent) {
         LOGGER.log(Level.INFO, "Processing acceptContactInvite request[" + requestEvent + "]");
         AcceptContactInviteRequest req = requestEvent.getRequest();
         User user = userService.getUser(requestEvent.getUserId());
-        Notification notif = notificationService.getNotification(req.getId());
+        Notification notif = notificationService.getNotification(user, req.getId());
         User referer = notif.getReferer();
 
         if (user != null) {
@@ -301,7 +303,7 @@ public class BusinessLogicImpl implements BusinessLogic {
             // process old notif to remove
             List<Notification> notifications = new ArrayList<Notification>();
             notifications.add(notif);
-            notificationService.removeNotifications(notifications);
+            notificationService.removeNotifications(user, notifications);
 
             StatusResponse resp = new StatusResponse(HttpStatus.SC_OK, "Accept Contact Invite successful");
             //getOwnNotification(user, resp);
@@ -312,18 +314,18 @@ public class BusinessLogicImpl implements BusinessLogic {
         }
     }
 
-    //@Transaction(TxnType.REQUIRED)
+    @Transaction(TxnType.REQUIRED)
     public ResponseEvent<StatusResponse> denyContactInvite(RequestEvent<DenyContactInviteRequest> requestEvent) {
         LOGGER.log(Level.INFO, "Processing denyContactInvite request[" + requestEvent + "]");
         DenyContactInviteRequest req = requestEvent.getRequest();
         User user = userService.getUser(requestEvent.getUserId());
-        Notification notif = notificationService.getNotification(req.getId());
+        Notification notif = notificationService.getNotification(user, req.getId());
 
         if (user != null) {
             List<Notification> notifications = new ArrayList<Notification>();
             // process old notif to remove
             notifications.add(notif);
-            notificationService.removeNotifications(notifications);
+            notificationService.removeNotifications(user, notifications);
 
             StatusResponse resp = new StatusResponse(HttpStatus.SC_OK, "Deny Contact Invite successful");
             //getOwnNotification(user, resp);
@@ -349,7 +351,7 @@ public class BusinessLogicImpl implements BusinessLogic {
                 msgs.add(new com.home911.httpchat.servlet.model.Message(message.getFrom().getId(), message.getText()));
             }
             resp.setMessages(msgs);
-            messageService.removeMessages(messages);
+            messageService.removeMessages(user, messages);
         }
 
         if ((resp.getAlerts() == null || resp.getAlerts().isEmpty()) &&
@@ -394,6 +396,7 @@ public class BusinessLogicImpl implements BusinessLogic {
                 "Get Contacts successful", ownContacts));
     }
 
+    @Transaction(TxnType.REQUIRED)
     public ResponseEvent<StatusResponse> processSendMessage(RequestEvent<SendMessageRequest> requestEvent) {
         LOGGER.log(Level.INFO, "Processing sendMessage request[" + requestEvent + "]");
         SendMessageRequest req = requestEvent.getRequest();
