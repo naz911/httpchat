@@ -9,7 +9,7 @@ public class Message {
     }
 
     public Message(Long from, String text) {
-        this.to = from;
+        this.from = from;
         this.text = text;
     }
 

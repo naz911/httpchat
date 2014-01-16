@@ -2,10 +2,10 @@ import httplib
 import base64
 import json
 
-#HOST="myhttprestchat.appspot.com"
-#PORT=80
-HOST="localhost"
-PORT=8080
+HOST="myhttprestchat.appspot.com"
+PORT=80
+#HOST="localhost"
+#PORT=8080
 IS_HTTPS="false";
 
 class HttpChatClient(object):
