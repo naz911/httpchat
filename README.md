@@ -1,7 +1,38 @@
 HTTP/REST Chat
-Copyright (C) 2014-2015 naz911@home.
+Copyright (C) 2014-2015 naz911@home (benoit.houle@gmail.com).
 
 ## HTTP/REST Chat application
+
+Look at the HttpChatClient python script for the client API, currently supporting:
+
+    Registration
+    Login/Logout
+    Poll
+    Profile
+        Update
+        Get
+    Contact
+        Search
+        Invite
+        Accept/Deny
+    Message
+        Send
+
+Next Features:
+
+    Contact
+        Delete
+    Group
+        Create
+        Invite
+
+Libraries/Dependencies:
+
+    AppEngine (GAE)
+    Objectivy
+    Guice
+    GSON
+    RestEasy
 
 Requires [Apache Maven](http://maven.apache.org) 3.0 or greater, and JDK 6+ in order to run.
 
