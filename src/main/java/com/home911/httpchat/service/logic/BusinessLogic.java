@@ -17,4 +17,5 @@ public interface BusinessLogic {
     public ResponseEvent<GetProfileResponse> processGetProfile(RequestEvent<GetProfileRequest> requestEvent);
     public ResponseEvent<GetContactsResponse> processGetContacts(RequestEvent<GetContactsRequest> requestEvent);
     public ResponseEvent<StatusResponse> processSendMessage(RequestEvent<SendMessageRequest> requestEvent);
+    public ResponseEvent<StatusResponse> processRemoveContact(RequestEvent<RemoveContactRequest> requestEvent);
 }

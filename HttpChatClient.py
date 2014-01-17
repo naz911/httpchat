@@ -2,10 +2,10 @@ import httplib
 import base64
 import json
 
-HOST="myhttprestchat.appspot.com"
-PORT=80
-#HOST="localhost"
-#PORT=8080
+#HOST="myhttprestchat.appspot.com"
+#PORT=80
+HOST="localhost"
+PORT=8080
 IS_HTTPS="false";
 
 class HttpChatClient(object):
@@ -345,6 +345,21 @@ class HttpChatClient(object):
         body = response.read()
         print response.status, response.reason, response.getheaders(), body;
 
+    def removeContactA(self):
+        request = ''
+        conn = self.getConnection()
+        print 'Sending removeContact A->B'
+        conn.request("DELETE", "/rest/secure/contact/%s" % (str(self.currentUserIdB)),
+                        request,
+                        {
+							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdA, self.currentTokenA))
+                        }
+                    ); 
+
+        response = conn.getresponse()
+        body = response.read()
+        print response.status, response.reason, response.getheaders(), body;
+
     def logoutA(self):
         request = ''
         conn = self.getConnection() 
@@ -376,27 +391,36 @@ class HttpChatClient(object):
         print response.status, response.reason, response.getheaders(), body;
 
 client = HttpChatClient()
-client.registerA()
-client.registerB()
+#client.registerA()
+#client.registerB()
 client.loginA()
 client.loginB()
-client.saveProfileA()
-client.getMyProfileA()
-client.saveProfileB()
-client.getMyProfileB()
-client.getProfileA()
-client.getProfileB()
+#client.saveProfileA()
+#client.getMyProfileA()
+#client.saveProfileB()
+#client.getMyProfileB()
+#client.getProfileA()
+#client.getProfileB()
+#client.searchContactsA()
+#client.searchContactsB()
+#client.inviteContactA()
+#client.pollB()
+#client.acceptContactInviteB()
+client.getContactsA()
+client.getContactsB()
+#client.sendMessageA()
+#client.sendMessageB()
+#client.pollA()
+#client.pollB()
+client.removeContactA()
+client.getContactsA()
+client.getContactsB()
+client.pollB()
 client.searchContactsA()
-client.searchContactsB()
 client.inviteContactA()
 client.pollB()
 client.acceptContactInviteB()
-client.pollA()
 client.getContactsA()
 client.getContactsB()
-client.sendMessageA()
-client.sendMessageB()
-client.pollA()
-client.pollB()
 client.logoutA()
 client.logoutB()

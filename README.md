@@ -7,21 +7,20 @@ Look at the HttpChatClient python script for the client API, currently supportin
 
     Registration
     Login/Logout
-    Poll
+    Poll(Alerts)
     Profile
         Update
         Get
     Contact
         Search
         Invite
+        Remove
         Accept/Deny
     Message
         Send
 
 Next Features:
 
-    Contact
-        Delete
     Group
         Create
         Invite

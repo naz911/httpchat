@@ -73,32 +73,32 @@ public class BusinessLogicImpl implements BusinessLogic {
             // generate login response
             LoginResponse resp = new LoginResponse(HttpStatus.SC_OK, "Login successful", token, user.getId(), profile);
 
-            if (user.getUserInfo().getContacts() != null && !user.getUserInfo().getContacts().isEmpty()) {
-                List<Contact> ownContacts = new ArrayList<Contact>(user.getUserInfo().getContacts().size());
-                List<Notification> notifications = new ArrayList<Notification>();
+            List<Contact> ownContacts = new ArrayList<Contact>(user.getUserInfo().getContacts().size());
+            List<Notification> notifications = new ArrayList<Notification>();
 
-                for (Ref<User> contactRef : user.getUserInfo().getContacts()) {
-                    User contact = contactRef.get();
-                    String name = StringUtils.isEmpty(contact.getUserInfo().getFullname()) ? contact.getUsername() :
-                            contact.getUserInfo().getFullname();
-                    ownContacts.add(new Contact(contact.getId(), name, contact.getPresence()));
+            for (Ref<User> contactRef : user.getUserInfo().getContacts()) {
+                User contact = contactRef.get();
+                String name = StringUtils.isEmpty(contact.getUserInfo().getFullname()) ? contact.getUsername() :
+                        contact.getUserInfo().getFullname();
+                ownContacts.add(new Contact(contact.getId(), name, contact.getPresence()));
 
-                    // generate presente notifications
-                    if (Presence.ONLINE == contact.getPresence()) {
-                        Notification notif = new Notification();
-                        notif.setOwner(contact);
-                        notif.setType(NotificationType.PRESENCE);
-                        notif.setReferer(contactRef.get());
-                        notif.setData(Presence.ONLINE.name());
-                        notifications.add(notif);
-                    }
+                // generate presente notifications
+                if (Presence.ONLINE == contact.getPresence()) {
+                    Notification notif = new Notification();
+                    notif.setOwner(contact);
+                    notif.setType(NotificationType.PRESENCE);
+                    notif.setReferer(contactRef.get());
+                    notif.setData(Presence.ONLINE.name());
+                    notifications.add(notif);
                 }
+            }
 
-                // generate presence notifications
-                if (!notifications.isEmpty()) {
-                    notificationService.addNotifications(notifications);
-                }
+            // generate presence notifications
+            if (!notifications.isEmpty()) {
+                notificationService.addNotifications(notifications);
+            }
 
+            if (!ownContacts.isEmpty()) {
                 resp.setContacts(ownContacts);
             }
 
@@ -122,22 +122,20 @@ public class BusinessLogicImpl implements BusinessLogic {
             user.setToken(null);
             userService.saveUser(user);
 
-            if (user.getUserInfo().getContacts() != null && !user.getUserInfo().getContacts().isEmpty()) {
-                List<Notification> notifications = new ArrayList<Notification>();
-                for (Ref<User> contactRef : user.getUserInfo().getContacts()) {
-                    User contact = contactRef.get();
-                    if (Presence.ONLINE == contact.getPresence()) {
-                        Notification notif = new Notification();
-                        notif.setOwner(contact);
-                        notif.setType(NotificationType.PRESENCE);
-                        notif.setReferer(contactRef.get());
-                        notif.setData(Presence.OFFLINE.name());
-                        notifications.add(notif);
-                    }
+            List<Notification> notifications = new ArrayList<Notification>();
+            for (Ref<User> contactRef : user.getUserInfo().getContacts()) {
+                User contact = contactRef.get();
+                if (Presence.ONLINE == contact.getPresence()) {
+                    Notification notif = new Notification();
+                    notif.setOwner(contact);
+                    notif.setType(NotificationType.PRESENCE);
+                    notif.setReferer(contactRef.get());
+                    notif.setData(Presence.OFFLINE.name());
+                    notifications.add(notif);
                 }
-                if (!notifications.isEmpty()) {
-                    notificationService.addNotifications(notifications);
-                }
+            }
+            if (!notifications.isEmpty()) {
+                notificationService.addNotifications(notifications);
             }
 
             // get own notifications
@@ -187,22 +185,20 @@ public class BusinessLogicImpl implements BusinessLogic {
             user.getUserInfo().setFullname(req.getProfile().getFullname());
             userInfoService.saveUserInfo(user.getUserInfo());
 
-            if (user.getUserInfo().getContacts() != null && !user.getUserInfo().getContacts().isEmpty()) {
-                List<Notification> notifications = new ArrayList<Notification>();
-                for (Ref<User> contactRef : user.getUserInfo().getContacts()) {
-                    User contact = contactRef.get();
-                    if (Presence.ONLINE == contact.getPresence()) {
-                        Notification notif = new Notification();
-                        notif.setOwner(contact);
-                        notif.setType(NotificationType.PROFILE);
-                        notif.setReferer(contactRef.get());
-                        notifications.add(notif);
-                    }
+            List<Notification> notifications = new ArrayList<Notification>();
+            for (Ref<User> contactRef : user.getUserInfo().getContacts()) {
+                User contact = contactRef.get();
+                if (Presence.ONLINE == contact.getPresence()) {
+                    Notification notif = new Notification();
+                    notif.setOwner(contact);
+                    notif.setType(NotificationType.PROFILE);
+                    notif.setReferer(contactRef.get());
+                    notifications.add(notif);
                 }
+            }
 
-                if (!notifications.isEmpty()) {
-                    notificationService.addNotifications(notifications);
-                }
+            if (!notifications.isEmpty()) {
+                notificationService.addNotifications(notifications);
             }
 
             StatusResponse resp = new StatusResponse(HttpStatus.SC_OK, "Update Profile successful");
@@ -248,22 +244,18 @@ public class BusinessLogicImpl implements BusinessLogic {
 
         if (user != null) {
             UserInfo userInfo = user.getUserInfo();
-
-            if (userInfo.getContacts() != null) {
-                for (Ref<User> contact : userInfo.getContacts()) {
-                    if (req.getId().equals(contact.get().getId())) {
-                        // already in contact list..
-                        throw new ContactAlreadyExistException();
-                    }
-                }
-            }
-            if (userInfo.getPendingContactIds() != null &&
-                    user.getUserInfo().getPendingContactIds().contains(req.getId())) {
-                throw new ContactInviteAlreadyExistException();
-            }
             User contact = userService.getUser(req.getId());
 
-            userInfo.addPendingContact(req.getId());
+            if (userInfo.isContact(contact)) {
+                // already in contact list..
+                throw new ContactAlreadyExistException();
+            }
+
+            if (userInfo.isPendingContact(contact)) {
+                throw new ContactInviteAlreadyExistException();
+            }
+
+            userInfo.addPendingContact(contact);
             userInfoService.saveUserInfo(userInfo);
 
             List<Notification> notifications = new ArrayList<Notification>();
@@ -380,16 +372,24 @@ public class BusinessLogicImpl implements BusinessLogic {
         LOGGER.log(Level.INFO, "Processing getProfile request[" + requestEvent + "]");
         User user = userService.getUser(requestEvent.getUserId());
 
-        List<Contact> ownContacts = null;
-        if (user.getUserInfo().getContacts() != null && !user.getUserInfo().getContacts().isEmpty()) {
-            ownContacts = new ArrayList<Contact>(user.getUserInfo().getContacts().size());
+        List<Contact> ownContacts = new ArrayList<Contact>(user.getUserInfo().getContacts().size());
+        // Adding "standard" contacts
+        for (Ref<User> contactRef : user.getUserInfo().getContacts()) {
+            User contact = contactRef.get();
+            String name = StringUtils.isEmpty(contact.getUserInfo().getFullname()) ? contact.getUsername() :
+                    contact.getUserInfo().getFullname();
+            ownContacts.add(new Contact(contact.getId(), name, contact.getPresence()));
+        }
+        // Adding "pending" contacts as OFFLINE
+        for (Ref<User> contactRef : user.getUserInfo().getPendingContacts()) {
+            User contact = contactRef.get();
+            String name = StringUtils.isEmpty(contact.getUserInfo().getFullname()) ? contact.getUsername() :
+                    contact.getUserInfo().getFullname();
+            ownContacts.add(new Contact(contact.getId(), name, Presence.OFFLINE));
+        }
 
-            for (Ref<User> contactRef : user.getUserInfo().getContacts()) {
-                User contact = contactRef.get();
-                String name = StringUtils.isEmpty(contact.getUserInfo().getFullname()) ? contact.getUsername() :
-                        contact.getUserInfo().getFullname();
-                ownContacts.add(new Contact(contact.getId(), name, contact.getPresence()));
-            }
+        if (ownContacts.isEmpty()) {
+            ownContacts = null;
         }
 
         return new ResponseEvent<GetContactsResponse>(new GetContactsResponse(HttpStatus.SC_OK,
@@ -410,6 +410,31 @@ public class BusinessLogicImpl implements BusinessLogic {
         } else {
             throw new UserOfflineException();
         }
+    }
+
+    @Transaction(TxnType.REQUIRED)
+    public ResponseEvent<StatusResponse> processRemoveContact(RequestEvent<RemoveContactRequest> requestEvent) {
+        LOGGER.log(Level.INFO, "Processing removeContact request[" + requestEvent + "]");
+        RemoveContactRequest req = requestEvent.getRequest();
+        User user = userService.getUser(requestEvent.getUserId());
+        User contact = userService.getUser(req.getId());
+        user.getUserInfo().removeContact(contact);
+        userInfoService.saveUserInfo(user.getUserInfo());
+
+        contact.getUserInfo().removeContact(user);
+        contact.getUserInfo().addPendingContact(user);
+        userInfoService.saveUserInfo(contact.getUserInfo());
+
+        List<Notification> notifications = new ArrayList<Notification>();
+        Notification notif = new Notification();
+        notif.setOwner(contact);
+        notif.setType(NotificationType.PRESENCE);
+        notif.setReferer(user);
+        notifications.add(notif);
+        notificationService.addNotifications(notifications);
+
+        return new ResponseEvent<StatusResponse>(new StatusResponse(HttpStatus.SC_OK,
+                "Remove Contact successful"));
     }
 
     private EnumSet<ContactSearchFilterField> getContactSearchFilter(EnumSet<ContactFilterType> filterTypes) {

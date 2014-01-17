@@ -18,7 +18,7 @@ public class UserInfo {
 
     private Set<Ref<User>> contacts;
 
-    private Set<Long> pendingContactIds;
+    private Set<Ref<User>> pendingContacts;
 
     public Long getId() {
         return id;
@@ -45,6 +45,10 @@ public class UserInfo {
     }
 
     public Set<Ref<User>> getContacts() {
+        if (contacts == null)
+        {
+            return Collections.unmodifiableSet(new HashSet<Ref<User>>());
+        }
         return contacts;
     }
 
@@ -52,19 +56,39 @@ public class UserInfo {
         this.contacts = contacts;
     }
 
-    public Set<Long> getPendingContactIds() {
-        return pendingContactIds;
-    }
-
-    public void setPendingContactIds(Set<Long> pendingContactIds) {
-        this.pendingContactIds = pendingContactIds;
-    }
-
-    public void addPendingContact(Long id) {
-        if (pendingContactIds == null) {
-            pendingContactIds = new HashSet<Long>();
+    public Set<Ref<User>> getPendingContacts() {
+        if (pendingContacts == null)
+        {
+            return Collections.unmodifiableSet(new HashSet<Ref<User>>());
         }
-        pendingContactIds.add(id);
+        return pendingContacts;
+    }
+
+    public void setPendingContacts(Set<Ref<User>> pendingContact) {
+        this.pendingContacts = pendingContact;
+    }
+
+    public void addPendingContact(User contact) {
+        if (pendingContacts == null) {
+            pendingContacts = new HashSet<Ref<User>>();
+        }
+        pendingContacts.add(Ref.create(contact));
+    }
+
+    public boolean isPendingContact(User contact) {
+        if (pendingContacts != null) {
+            return pendingContacts.contains(Ref.create(contact));
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isContact(User contact) {
+        if (contacts != null) {
+            return contacts.contains(Ref.create(contact));
+        } else {
+            return false;
+        }
     }
 
     public void addContact(User user) {
@@ -73,8 +97,14 @@ public class UserInfo {
         }
         contacts.add(Ref.create(user));
 
-        if (pendingContactIds != null) {
-            pendingContactIds.remove(user.getId());
+        if (pendingContacts != null) {
+            pendingContacts.remove(Ref.create(user));
+        }
+    }
+
+    public void removeContact(User user) {
+        if (contacts != null) {
+            contacts.remove(Ref.create(user));
         }
     }
 }

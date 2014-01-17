@@ -4,10 +4,7 @@ import com.google.inject.Inject;
 import com.home911.httpchat.service.logic.BusinessLogic;
 import com.home911.httpchat.servlet.event.RequestEvent;
 import com.home911.httpchat.servlet.event.ResponseEvent;
-import com.home911.httpchat.servlet.primitive.AcceptContactInviteRequest;
-import com.home911.httpchat.servlet.primitive.ContactInviteRequest;
-import com.home911.httpchat.servlet.primitive.DenyContactInviteRequest;
-import com.home911.httpchat.servlet.primitive.StatusResponse;
+import com.home911.httpchat.servlet.primitive.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -32,6 +29,17 @@ public class ContactResource {
         ResponseEvent<StatusResponse> respEvent =
                 businessLogic.processContactInvite(new RequestEvent<ContactInviteRequest>(id,
                         new ContactInviteRequest(cid)));
+
+        return Response.ok(respEvent.getResponse()).build();
+    }
+
+    @DELETE
+    @Path("/{cid}")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response removeContact(@HeaderParam("x-httpchat-userid") Long id, @PathParam("cid") Long cid) {
+        ResponseEvent<StatusResponse> respEvent =
+                businessLogic.processRemoveContact(new RequestEvent<RemoveContactRequest>(id,
+                        new RemoveContactRequest(cid)));
 
         return Response.ok(respEvent.getResponse()).build();
     }
