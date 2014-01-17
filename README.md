@@ -21,6 +21,8 @@ Look at the HttpChatClient python script for the client API, currently supportin
 
 Next Features:
 
+    Profile
+        Improve (add more detail)
     Group
         Create
         Invite

@@ -2,10 +2,10 @@ import httplib
 import base64
 import json
 
-#HOST="myhttprestchat.appspot.com"
-#PORT=80
-HOST="localhost"
-PORT=8080
+HOST="myhttprestchat.appspot.com"
+PORT=80
+#HOST="localhost"
+#PORT=8080
 IS_HTTPS="false";
 
 class HttpChatClient(object):
@@ -391,31 +391,31 @@ class HttpChatClient(object):
         print response.status, response.reason, response.getheaders(), body;
 
 client = HttpChatClient()
-#client.registerA()
-#client.registerB()
+client.registerA()
+client.registerB()
 client.loginA()
 client.loginB()
-#client.saveProfileA()
-#client.getMyProfileA()
-#client.saveProfileB()
-#client.getMyProfileB()
-#client.getProfileA()
-#client.getProfileB()
-#client.searchContactsA()
-#client.searchContactsB()
-#client.inviteContactA()
-#client.pollB()
-#client.acceptContactInviteB()
+client.saveProfileA()
+client.getMyProfileA()
+client.saveProfileB()
+client.getMyProfileB()
+client.getProfileA()
+client.getProfileB()
+client.searchContactsA()
+client.searchContactsB()
+client.inviteContactA()
+client.pollB()
+client.acceptContactInviteB()
 client.getContactsA()
 client.getContactsB()
-#client.sendMessageA()
-#client.sendMessageB()
-#client.pollA()
-#client.pollB()
+client.sendMessageA()
+client.sendMessageB()
+client.pollA()
+client.pollB()
 client.removeContactA()
 client.getContactsA()
-client.getContactsB()
 client.pollB()
+client.getContactsB()
 client.searchContactsA()
 client.inviteContactA()
 client.pollB()

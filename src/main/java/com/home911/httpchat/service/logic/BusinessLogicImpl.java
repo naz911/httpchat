@@ -82,7 +82,7 @@ public class BusinessLogicImpl implements BusinessLogic {
                         contact.getUserInfo().getFullname();
                 ownContacts.add(new Contact(contact.getId(), name, contact.getPresence()));
 
-                // generate presente notifications
+                // generate presence notifications
                 if (Presence.ONLINE == contact.getPresence()) {
                     Notification notif = new Notification();
                     notif.setOwner(contact);
@@ -102,7 +102,7 @@ public class BusinessLogicImpl implements BusinessLogic {
                 resp.setContacts(ownContacts);
             }
 
-            getOwnNotification(user, resp);
+            //getOwnNotification(user, resp);
 
             return new ResponseEvent<LoginResponse>(resp);
 
@@ -430,6 +430,7 @@ public class BusinessLogicImpl implements BusinessLogic {
         notif.setOwner(contact);
         notif.setType(NotificationType.PRESENCE);
         notif.setReferer(user);
+        notif.setData(Presence.OFFLINE.name());
         notifications.add(notif);
         notificationService.addNotifications(notifications);
 
@@ -473,12 +474,20 @@ public class BusinessLogicImpl implements BusinessLogic {
     private void getOwnNotification(User user, StatusResponse resp) {
         // get own notifications
         List<Notification> ownNotifications = notificationService.getNotifications(user);
+        List<Notification> notifToRemove = new ArrayList<Notification>();
         if (ownNotifications != null && !ownNotifications.isEmpty()) {
             List<Alert> alerts = new ArrayList<Alert>(ownNotifications.size());
             for(Notification notif : ownNotifications) {
+                if (NotificationType.PRESENCE == notif.getType() ||
+                    NotificationType.PROFILE == notif.getType()) {
+                    notifToRemove.add(notif);
+                }
                 alerts.add(new Alert(notif.getId(), notif.getType(), user.getId(), notif.getData()));
             }
             resp.setAlerts(alerts);
+        }
+        if (!notifToRemove.isEmpty()) {
+            notificationService.removeNotifications(user, notifToRemove);
         }
     }
 }
