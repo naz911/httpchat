@@ -30,7 +30,7 @@ Next Features:
 Libraries/Dependencies:
 
     AppEngine (GAE)
-    Objectivy
+    Objectify
     Guice
     GSON
     RestEasy
