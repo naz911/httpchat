@@ -5,7 +5,7 @@ Copyright (C) 2014-2015 naz911@home (benoit.houle@gmail.com).
 
 Look at the HttpChatClient python script for the client API, currently supporting:
 
-    Registration
+    Registration with email activation
     Login/Logout
     Poll(Alerts)
     Profile

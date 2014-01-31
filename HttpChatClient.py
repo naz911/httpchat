@@ -1,6 +1,7 @@
 import httplib
 import base64
 import json
+import re
 
 #HOST="myhttprestchat.appspot.com"
 #PORT=80
@@ -32,12 +33,56 @@ class HttpChatClient(object):
         response = conn.getresponse()
         body = response.read()
         print response.status, response.reason, response.getheaders(), body;
+        self.confirmUrlA = ""
+        jsonData = json.loads(body)
+        if "confirmUrl" in jsonData:
+            self.confirmUrlA = jsonData["confirmUrl"]
+        print 'confirm URL for user A is:' + self.confirmUrlA
+        self.confirmUrlA = re.sub(r'^https?:\/\/.*rest\/', '', self.confirmUrlA)
+        print 'confirm URL for user A is:' + self.confirmUrlA
+
+    def confirmRegisterA(self):
+        request = ''
+        conn = self.getConnection() 
+        print 'Sending confirmRegister A'
+        conn.request("GET", "/rest/%s" % (self.confirmUrlA),
+                        request,
+                        {
+                            "Content-type" : "application/json"
+                        }
+                    ); 
+
+        response = conn.getresponse()
+        body = response.read()
+        print response.status, response.reason, response.getheaders(), body;
 
     def registerB(self):
         request = '{"username":"gringo","password":"qazwsx","email":"gringo.hull@here.com"}'
         conn = self.getConnection() 
         print 'Sending register B'
         conn.request("POST", "/rest/register",
+                        request,
+                        {
+                            "Content-type" : "application/json"
+                        }
+                    ); 
+
+        response = conn.getresponse()
+        body = response.read()
+        print response.status, response.reason, response.getheaders(), body;
+        self.confirmUrlB = ""
+        jsonData = json.loads(body)
+        if "confirmUrl" in jsonData:
+            self.confirmUrlA = jsonData["confirmUrl"]
+        print 'confirm URL for user B is:' + self.confirmUrlB
+        self.confirmUrlB = re.sub(r'^https?:\/\/.*rest\/', '', self.confirmUrlB)
+        print 'confirm URL for user B is:' + self.confirmUrlB
+
+    def confirmRegisterB(self):
+        request = ''
+        conn = self.getConnection() 
+        print 'Sending confirmRegister B'
+        conn.request("GET", "/rest/%s" % (self.confirmUrlB),
                         request,
                         {
                             "Content-type" : "application/json"
@@ -392,7 +437,9 @@ class HttpChatClient(object):
 
 client = HttpChatClient()
 client.registerA()
+client.confirmRegisterA()
 client.registerB()
+client.confirmRegisterB()
 client.loginA()
 client.loginB()
 client.saveProfileA()
