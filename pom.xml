@@ -12,6 +12,9 @@
         <appengine.app.version>1</appengine.app.version>
         <appengine.target.version>1.8.9</appengine.target.version>
 		<appengine.objectify.version>4.0rc2</appengine.objectify.version>
+		<google.webtoolkit.version>2.6.0-rc3</google.webtoolkit.version>
+		<google.guava-gwt.version>16.0</google.guava-gwt.version>
+		<gtw.smartgtw.version>4.0</gtw.smartgtw.version>
 		<google.guice.version>3.0</google.guice.version>
 		<google.gson.version>2.2.4</google.gson.version>
 		<commons.lang.version>3.1</commons.lang.version>
@@ -34,6 +37,28 @@
             <artifactId>servlet-api</artifactId>
             <version>2.5</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-servlet</artifactId>
+            <version>${google.webtoolkit.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${google.webtoolkit.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.smartgwt</groupId>
+            <artifactId>smartgwt</artifactId>
+            <version>${gtw.smartgtw.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.smartgwt</groupId>
+            <artifactId>smartgwt-skins</artifactId>
+            <version>${gtw.smartgtw.version}</version>
         </dependency>
         <dependency>
             <groupId>jstl</groupId>
@@ -79,6 +104,12 @@
             <groupId>com.google.inject.extensions</groupId>
             <artifactId>guice-servlet</artifactId>
             <version>${google.guice.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava-gwt</artifactId>
+            <version>${google.guava-gwt.version}</version>
         </dependency>
 
         <dependency>
@@ -160,6 +191,19 @@
                     </jvmFlags>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <version>2.6.0-rc3</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -171,6 +215,11 @@
         <repository>
             <id>JBoss repository</id>
             <url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+        </repository>
+        <repository>
+            <id>smartclient</id>
+            <name>smartclient.com</name>
+            <url>http://www.smartclient.com/maven2</url>
         </repository>
     </repositories>
 </project>

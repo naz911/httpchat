@@ -18,9 +18,22 @@ Look at the HttpChatClient python script for the client API, currently supportin
         Accept/Deny
     Message
         Send
+    GUI
+        Login/Logout
+        Register
+        Contact
+            Search
+            Invite
+            Remove
+            Accept/Deny
+        Alerts
+            Poll
 
 Next Features:
-
+    GUI
+        Message
+            Send/Receive
+        Enhance (images, colors)
     Profile
         Improve (add more detail)
     Group
@@ -35,6 +48,7 @@ Libraries/Dependencies:
     GSON
     RestEasy
     Transaction (AOP)
+    GWT
 
 Requires [Apache Maven](http://maven.apache.org) 3.0 or greater, and JDK 6+ in order to run.
 
@@ -49,6 +63,10 @@ Building will run the tests, but to explicitly run tests you can use the test ta
 To start the app, use the [App Engine Maven Plugin](http://code.google.com/p/appengine-maven-plugin/) that is already included in this demo.  Just run the command.
 
     mvn appengine:devserver
+
+Once started, the GUI can be reached by going to URL:
+
+    http://localhost:8080
 
 For further information, consult the [Java App Engine](https://developers.google.com/appengine/docs/java/overview) documentation.
 
