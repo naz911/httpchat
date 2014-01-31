@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 public class EmailServiceImpl implements EmailService {
     private static final Logger LOGGER = Logger.getLogger(EmailServiceImpl.class.getCanonicalName());
-    private static final String NO_REPLY_SENDER = "no-reply@myhttprestchat.appspot.com";
+    private static final String NO_REPLY_SENDER = "httpchat.alskdkfj@gmail.com";
     private static final String CONFIRM_REGISTRATION_SUBJECT = "HttpChat Confirm Registration";
     private static final String CONFIRM_REGISTRATION_TEXT_BODY = "Hi {0},\r\n\r\nWelcome to HttpChat, please confirm your email address by going to the following link:\r\n{1}\r\n\r\nThanks and see you soon!";
 

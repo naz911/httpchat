@@ -13,16 +13,15 @@ import com.home911.httpchat.server.service.user.UserService;
 import com.home911.httpchat.server.service.userinfo.UserInfoService;
 import com.home911.httpchat.server.servlet.event.RequestEvent;
 import com.home911.httpchat.server.servlet.event.ResponseEvent;
-import com.home911.httpchat.shared.model.*;
 import com.home911.httpchat.server.servlet.primitive.*;
 import com.home911.httpchat.server.transaction.Transaction;
+import com.home911.httpchat.shared.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.jboss.resteasy.util.Base64;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -186,8 +185,9 @@ public class BusinessLogicImpl implements BusinessLogic {
         user.setUsername(req.getUsername());
         user.setPassword(req.getPassword());
         user.setEmail(req.getEmail());
-
+        //user.setActivated(true);
         userService.saveUser(user);
+
 
         StringBuilder confirmUrl = new StringBuilder(req.getConfirmUrl());
         confirmUrl.append(generateRegisterCode(user));
