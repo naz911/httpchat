@@ -7,7 +7,9 @@ Look at the HttpChatClient python script for the client API, currently supportin
 
     Registration with email activation
     Login/Logout
-    Poll(Alerts)
+    Alerts
+        Poll
+        Push
     Profile
         Update
         Get
@@ -28,6 +30,7 @@ Look at the HttpChatClient python script for the client API, currently supportin
             Accept/Deny
         Alerts
             Poll
+            Push
 
 Next Features:
     GUI

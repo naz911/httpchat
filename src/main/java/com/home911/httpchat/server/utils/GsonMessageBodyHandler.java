@@ -1,9 +1,6 @@
 package com.home911.httpchat.server.utils;
 
-import com.google.gson.*;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.ISODateTimeFormat;
+import com.google.gson.Gson;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
@@ -28,15 +25,8 @@ public final class GsonMessageBodyHandler implements MessageBodyWriter<Object>,
     private static final String UTF_8 = "UTF-8";
     private static final Logger LOGGER = Logger.getLogger(GsonMessageBodyHandler.class.getCanonicalName());
 
-    private Gson gson;
-
     private Gson getGson() {
-        if (gson == null) {
-            final GsonBuilder gsonBuilder = new GsonBuilder();
-            gson = gsonBuilder.registerTypeAdapter(DateTime.class, new DateTimeDeserializer())
-                    .registerTypeAdapter(DateTime.class, new DateTimeSerializer()).create();
-        }
-        return gson;
+        return GsonUtil.getInstance().getGson();
     }
 
     @Override
@@ -94,19 +84,6 @@ public final class GsonMessageBodyHandler implements MessageBodyWriter<Object>,
             getGson().toJson(object, jsonType, writer);
         } finally {
             writer.close();
-        }
-    }
-
-    private static class DateTimeDeserializer implements JsonDeserializer<DateTime> {
-        public DateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                throws JsonParseException {
-            return new DateTime(ISODateTimeFormat.dateParser().parseDateTime(json.getAsString()), DateTimeZone.UTC);
-        }
-    }
-
-    private static class DateTimeSerializer implements JsonSerializer<DateTime> {
-        public JsonElement serialize(DateTime src, Type typeOfSrc, JsonSerializationContext context) {
-            return new JsonPrimitive(ISODateTimeFormat.dateTimeNoMillis().print(src));
         }
     }
 }

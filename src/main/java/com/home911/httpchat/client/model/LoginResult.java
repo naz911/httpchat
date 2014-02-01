@@ -8,6 +8,7 @@ import java.util.List;
 public class LoginResult extends StatusResult {
     private Long userId;
     private String token;
+    private String channelToken;
     private Profile profile;
     private List<Contact> contacts;
 
@@ -43,15 +44,23 @@ public class LoginResult extends StatusResult {
         this.contacts = contacts;
     }
 
+    public String getChannelToken() {
+        return channelToken;
+    }
+
+    public void setChannelToken(String channelToken) {
+        this.channelToken = channelToken;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("LoginResult{");
-        sb.append(super.toString()).append(",")
-            .append("userId=").append(userId)
-            .append(", token='").append(token)
-            .append(", profile=").append(profile)
-            .append(", contacts=").append(contacts)
-            .append('}');
+        sb.append("userId=").append(userId);
+        sb.append(", token='").append(token).append('\'');
+        sb.append(", channelToken='").append(channelToken).append('\'');
+        sb.append(", profile=").append(profile);
+        sb.append(", contacts=").append(contacts);
+        sb.append('}');
         return sb.toString();
     }
 }

@@ -11,17 +11,17 @@
     <properties>
         <appengine.app.version>1</appengine.app.version>
         <appengine.target.version>1.8.9</appengine.target.version>
-		<appengine.objectify.version>4.0rc2</appengine.objectify.version>
-		<google.webtoolkit.version>2.6.0-rc3</google.webtoolkit.version>
-		<google.guava-gwt.version>16.0</google.guava-gwt.version>
-		<gtw.smartgtw.version>4.0</gtw.smartgtw.version>
-		<google.guice.version>3.0</google.guice.version>
-		<google.gson.version>2.2.4</google.gson.version>
-		<commons.lang.version>3.1</commons.lang.version>
-		<jodatime.version>2.3</jodatime.version>
-		<resteasy.version>3.0.6.Final</resteasy.version>
-		<junit.version>4.10</junit.version>
-		<mockito.version>1.9.0</mockito.version>
+        <appengine.objectify.version>4.0rc2</appengine.objectify.version>
+        <google.webtoolkit.version>2.6.0-rc3</google.webtoolkit.version>
+        <gtw.smartgtw.version>4.0</gtw.smartgtw.version>
+        <gwt.gae-channel.version>0.4-alpha</gwt.gae-channel.version>
+        <google.guice.version>3.0</google.guice.version>
+        <google.gson.version>2.2.4</google.gson.version>
+        <commons.lang.version>3.1</commons.lang.version>
+        <jodatime.version>2.3</jodatime.version>
+        <resteasy.version>3.0.6.Final</resteasy.version>
+        <junit.version>4.10</junit.version>
+        <mockito.version>1.9.0</mockito.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -49,6 +49,11 @@
             <artifactId>gwt-user</artifactId>
             <version>${google.webtoolkit.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-gae-channel</artifactId>
+            <version>${gwt.gae-channel.version}</version>
         </dependency>
         <dependency>
             <groupId>com.smartgwt</groupId>
@@ -107,12 +112,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava-gwt</artifactId>
-            <version>${google.guava-gwt.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>${google.gson.version}</version>
@@ -137,7 +136,7 @@
             <version>${appengine.target.version}</version>
             <scope>test</scope>
         </dependency>
-		<dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
@@ -184,7 +183,7 @@
                 <groupId>com.google.appengine</groupId>
                 <artifactId>appengine-maven-plugin</artifactId>
                 <version>${appengine.target.version}</version>
-				<configuration>
+                <configuration>
                     <jvmFlags>
                         <jvmFlag>-Xdebug</jvmFlag>
                         <jvmFlag>-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n</jvmFlag>
@@ -207,7 +206,7 @@
         </plugins>
     </build>
 
-	<repositories>
+    <repositories>
         <repository>
             <id>Maven2</id>
             <url>http://repo.maven.apache.org/maven2</url>

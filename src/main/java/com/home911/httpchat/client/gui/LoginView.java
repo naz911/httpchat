@@ -183,7 +183,7 @@ public class LoginView extends Composite {
                         }
                         loginWnd.hide();
                         mainView.getMenuView().writeStatus(loginResult.getStatus().getDescription());
-                        mainView.login(loginResult.getUserId(), loginResult.getToken());
+                        mainView.login(loginResult.getUserId(), loginResult.getToken(), loginResult.getChannelToken());
                         mainView.getMenuView().adjustAfterLogin(loginResult.getUserId(),
                                 loginResult.getToken(), loginResult.getProfile());
                         if (LOGGER.isLoggable(Level.INFO)) {

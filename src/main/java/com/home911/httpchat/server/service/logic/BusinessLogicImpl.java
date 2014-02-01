@@ -8,6 +8,7 @@ import com.home911.httpchat.server.model.*;
 import com.home911.httpchat.server.model.Message;
 import com.home911.httpchat.server.service.email.EmailService;
 import com.home911.httpchat.server.service.message.MessageService;
+import com.home911.httpchat.server.service.notification.NotificationPusher;
 import com.home911.httpchat.server.service.notification.NotificationService;
 import com.home911.httpchat.server.service.user.UserService;
 import com.home911.httpchat.server.service.userinfo.UserInfoService;
@@ -41,16 +42,19 @@ public class BusinessLogicImpl implements BusinessLogic {
     private final NotificationService notificationService;
     private final MessageService messageService;
     private final EmailService emailService;
+    private final NotificationPusher notificationPusher;
+
 
     @Inject
     public BusinessLogicImpl(UserService userService, UserInfoService userInfoService,
                              NotificationService notificationService, MessageService messageService,
-                             EmailService emailService) {
+                             EmailService emailService, NotificationPusher notificationPusher) {
         this.userService = userService;
         this.userInfoService = userInfoService;
         this.notificationService = notificationService;
         this.messageService = messageService;
         this.emailService = emailService;
+        this.notificationPusher = notificationPusher;
     }
 
     @Transaction(TxnType.REQUIRED)
@@ -78,14 +82,14 @@ public class BusinessLogicImpl implements BusinessLogic {
             }
             userService.saveUser(user);
 
+            String channelToken = notificationPusher.createChannel(String.valueOf(user.getId()));
+
             Profile profile = new Profile();
             profile.setFullname(user.getUserInfo().getFullname());
 
-            // generate login response
-            LoginResponse resp = new LoginResponse(HttpStatus.SC_OK, "Login successful", token, user.getId(), profile);
-
             List<Contact> ownContacts = new ArrayList<Contact>(user.getUserInfo().getContacts().size());
             List<Notification> notifications = new ArrayList<Notification>();
+            List<Notification> pushNotifications = new ArrayList<Notification>();
 
             for (Ref<User> contactRef : user.getUserInfo().getContacts()) {
                 User contact = contactRef.get();
@@ -100,7 +104,12 @@ public class BusinessLogicImpl implements BusinessLogic {
                     notif.setType(NotificationType.PRESENCE);
                     notif.setReferer(user);
                     notif.setData(Presence.ONLINE.name());
-                    notifications.add(notif);
+
+                    if (contact.isAvailableForPush()) {
+                        pushNotifications.add(notif);
+                    } else {
+                        notifications.add(notif);
+                    }
                 }
             }
 
@@ -112,11 +121,18 @@ public class BusinessLogicImpl implements BusinessLogic {
                 ownContacts.add(new Contact(contact.getId(), name, Presence.OFFLINE));
             }
 
+            // generate login response
+            LoginResponse resp = new LoginResponse(HttpStatus.SC_OK, "Login successful", token,
+                    user.getId(), profile, channelToken);
             resp.setContacts(ownContacts);
 
             // generate presence notifications
             if (!notifications.isEmpty()) {
                 notificationService.addNotifications(notifications);
+            }
+
+            if (!pushNotifications.isEmpty()) {
+                notificationPusher.push(pushNotifications);
             }
 
             //getOwnNotification(user, resp);
@@ -137,9 +153,12 @@ public class BusinessLogicImpl implements BusinessLogic {
             // update his presence
             user.setPresence(Presence.OFFLINE);
             user.setToken(null);
+            user.setChannelConnected(false);
             userService.saveUser(user);
 
             List<Notification> notifications = new ArrayList<Notification>();
+            List<Notification> pushNotifications = new ArrayList<Notification>();
+
             for (Ref<User> contactRef : user.getUserInfo().getContacts()) {
                 User contact = contactRef.get();
                 if (Presence.ONLINE == contact.getPresence()) {
@@ -148,11 +167,20 @@ public class BusinessLogicImpl implements BusinessLogic {
                     notif.setType(NotificationType.PRESENCE);
                     notif.setReferer(user);
                     notif.setData(Presence.OFFLINE.name());
-                    notifications.add(notif);
+
+                    if (contact.isAvailableForPush()) {
+                        pushNotifications.add(notif);
+                    } else {
+                        notifications.add(notif);
+                    }
                 }
             }
             if (!notifications.isEmpty()) {
                 notificationService.addNotifications(notifications);
+            }
+
+            if (!pushNotifications.isEmpty()) {
+                notificationPusher.push(pushNotifications);
             }
 
             // get own notifications
@@ -279,16 +307,25 @@ public class BusinessLogicImpl implements BusinessLogic {
             }
 
             List<Notification> notifications = new ArrayList<Notification>();
+            Notification pushNotif = null;
+
             if (contact.getUserInfo().isPendingContact(user)) {
                 userInfo.addContact(contact);
                 contact.getUserInfo().addContact(user);
                 userInfoService.saveUserInfo(contact.getUserInfo());
-                Notification newNotif = new Notification();
-                newNotif.setOwner(contact);
-                newNotif.setType(NotificationType.PRESENCE);
-                newNotif.setReferer(user);
-                newNotif.setData(Presence.ONLINE.name());
-                notifications.add(newNotif);
+                if (Presence.ONLINE == contact.getPresence()) {
+                    Notification newNotif = new Notification();
+                    newNotif.setOwner(contact);
+                    newNotif.setType(NotificationType.PRESENCE);
+                    newNotif.setReferer(user);
+                    newNotif.setData(Presence.ONLINE.name());
+
+                    if (!contact.isAvailableForPush()) {
+                        pushNotif = newNotif;
+                    } else {
+                        notifications.add(newNotif);
+                    }
+                }
             } else {
                 userInfo.addPendingContact(contact);
                 Notification notif = new Notification();
@@ -296,11 +333,19 @@ public class BusinessLogicImpl implements BusinessLogic {
                 notif.setType(NotificationType.CONTACT_INVITE);
                 notif.setReferer(user);
                 notifications.add(notif);
+                if (contact.isAvailableForPush()) {
+                    pushNotif = notif;
+                }
             }
 
             if (!notifications.isEmpty()) {
                 notificationService.addNotifications(notifications);
             }
+
+            if (pushNotif != null) {
+                notificationPusher.push(pushNotif);
+            }
+
             userInfoService.saveUserInfo(userInfo);
 
             StatusResponse resp = new StatusResponse(HttpStatus.SC_OK, "Contact Invite successful");
@@ -342,7 +387,11 @@ public class BusinessLogicImpl implements BusinessLogic {
                 newNotif.setType(NotificationType.PRESENCE);
                 newNotif.setReferer(user);
                 newNotif.setData(Presence.ONLINE.name());
-                notifications.add(newNotif);
+                if (referer.isAvailableForPush()) {
+                    notificationPusher.push(newNotif);
+                } else {
+                    notifications.add(newNotif);
+                }
             }
 
             if (!notifications.isEmpty()) {
@@ -484,8 +533,12 @@ public class BusinessLogicImpl implements BusinessLogic {
             notif.setType(NotificationType.PRESENCE);
             notif.setReferer(user);
             notif.setData(Presence.OFFLINE.name());
-            notifications.add(notif);
-            notificationService.addNotifications(notifications);
+            if (contact.isAvailableForPush()) {
+                notificationPusher.push(notif);
+            } else {
+                notifications.add(notif);
+                notificationService.addNotifications(notifications);
+            }
         }
 
         return new ResponseEvent<StatusResponse>(new StatusResponse(HttpStatus.SC_OK,

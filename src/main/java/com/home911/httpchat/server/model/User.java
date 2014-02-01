@@ -18,6 +18,7 @@ public class User {
     private Presence presence = Presence.OFFLINE;
     private String token;
     private boolean activated = false;
+    private boolean channelConnected;
 
     @Load
     private Ref<UserInfo> userInfo;
@@ -91,5 +92,17 @@ public class User {
 
     public void setActivated(boolean activated) {
         this.activated = activated;
+    }
+
+    public boolean isChannelConnected() {
+        return channelConnected;
+    }
+
+    public void setChannelConnected(boolean channelConnected) {
+        this.channelConnected = channelConnected;
+    }
+
+    public boolean isAvailableForPush() {
+        return Presence.ONLINE == getPresence() && isChannelConnected();
     }
 }

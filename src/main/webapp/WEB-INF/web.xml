@@ -26,6 +26,26 @@
         <url-pattern>/rest/*</url-pattern>
     </servlet-mapping>
 
+    <servlet-mapping>
+        <servlet-name>ChannelConnected</servlet-name>
+        <url-pattern>/_ah/channel/connected/</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ChannelConnected</servlet-name>
+        <servlet-class>com.home911.httpchat.server.servlet.resource.admin.ChannelConnectedServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ChannelDisconnected</servlet-name>
+        <url-pattern>/_ah/channel/disconnected/</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ChannelDisconnected</servlet-name>
+        <servlet-class>com.home911.httpchat.server.servlet.resource.admin.ChannelDisconnectedServlet</servlet-class>
+    </servlet>
+
     <filter>
         <filter-name>ObjectifyFilter</filter-name>
         <filter-class>com.googlecode.objectify.ObjectifyFilter</filter-class>

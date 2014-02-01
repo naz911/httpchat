@@ -73,7 +73,7 @@ class HttpChatClient(object):
         self.confirmUrlB = ""
         jsonData = json.loads(body)
         if "confirmUrl" in jsonData:
-            self.confirmUrlA = jsonData["confirmUrl"]
+            self.confirmUrlB = jsonData["confirmUrl"]
         print 'confirm URL for user B is:' + self.confirmUrlB
         self.confirmUrlB = re.sub(r'^https?:\/\/.*rest\/', '', self.confirmUrlB)
         print 'confirm URL for user B is:' + self.confirmUrlB
@@ -438,9 +438,9 @@ class HttpChatClient(object):
 client = HttpChatClient()
 client.registerA()
 client.confirmRegisterA()
-#client.registerB()
-#client.confirmRegisterB()
-client.loginA()
+client.registerB()
+client.confirmRegisterB()
+#client.loginA()
 #client.loginB()
 #client.saveProfileA()
 #client.getMyProfileA()
@@ -467,5 +467,5 @@ client.loginA()
 #client.inviteContactA()
 #client.getContactsA()
 #client.getContactsB()
-client.logoutA()
+#client.logoutA()
 #client.logoutB()

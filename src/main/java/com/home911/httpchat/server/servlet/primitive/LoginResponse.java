@@ -9,14 +9,16 @@ public class LoginResponse extends StatusResponse {
 
     private Profile profile;
     private List<Contact> contacts;
+    private String channelToken;
     private transient String token;
     private transient Long userId;
 
-    public LoginResponse(int code, String description, String token, Long userId, Profile profile) {
+    public LoginResponse(int code, String description, String token, Long userId, Profile profile, String channelToken) {
         super(code, description);
         this.token = token;
         this.userId = userId;
         this.profile = profile;
+        this.channelToken = channelToken;
     }
 
     public Profile getProfile() {
@@ -49,5 +51,13 @@ public class LoginResponse extends StatusResponse {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getChannelToken() {
+        return channelToken;
+    }
+
+    public void setChannelToken(String channelToken) {
+        this.channelToken = channelToken;
     }
 }

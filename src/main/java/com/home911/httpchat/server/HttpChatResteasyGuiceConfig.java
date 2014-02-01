@@ -12,7 +12,7 @@ import com.home911.httpchat.server.servlet.HttpChatGuiceServletModule;
 public class HttpChatResteasyGuiceConfig extends AbstractModule {
     @Override
     protected void configure() {
-        install(AppEngineGuiceModule.build().withMailService());
+        install(AppEngineGuiceModule.build().withChannelService().withMailService());
         install(new UserServiceGuiceModule());
         install(new UserInfoServiceGuiceModule());
         install(new NotificationServiceGuiceModule());

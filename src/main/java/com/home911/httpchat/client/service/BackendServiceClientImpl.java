@@ -1,7 +1,6 @@
 package com.home911.httpchat.client.service;
 
 import com.google.gwt.http.client.*;
-import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
@@ -9,17 +8,16 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.home911.httpchat.client.gui.MainView;
 import com.home911.httpchat.client.model.*;
 import com.home911.httpchat.client.utils.Base64Coder;
-import com.home911.httpchat.client.utils.JsonUtil;
-import com.home911.httpchat.shared.model.*;
+import com.home911.httpchat.client.utils.ParserUtil;
+import com.home911.httpchat.shared.model.ContactFilterType;
+import com.home911.httpchat.shared.model.Profile;
+import com.home911.httpchat.shared.model.Status;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class BackendServiceClientImpl implements BackendServiceClient {
     private static final Logger LOGGER = Logger.getLogger(BackendServiceClientImpl.class.getName());
-    //private static final String DEFAULT_BASE_URL = "http://localhost:8080/";
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
     private static final String CONTENT_TYPE = "application/json";
     private static final String TOKEN_HEADER = "x-httpchat-token";
@@ -40,14 +38,7 @@ public class BackendServiceClientImpl implements BackendServiceClient {
 
     private String getBaseUrl() {
         LOGGER.log(Level.INFO, "getBaseUrl[" + this.baseUrl + "]");
-        /*
-        if (this.baseUrl == null ||
-            this.baseUrl.trim().length() == 0) {
-            LOGGER.log(Level.INFO, "getBaseUrl is empty returning DEFAULT[" + DEFAULT_BASE_URL + "]");
-            return DEFAULT_BASE_URL;
-        } else {*/
-            return this.baseUrl;
-        //}
+        return this.baseUrl;
     }
 
     public MainView getMainView() {
@@ -68,7 +59,7 @@ public class BackendServiceClientImpl implements BackendServiceClient {
                         JSONValue value = JSONParser.parseStrict(response.getText());
                         if (value != null) {
                             JSONObject obj = value.isObject();
-                            status = parseStatus(obj);
+                            status = ParserUtil.parseStatus(obj);
                         } else {
                             status = new Status(500, "Problem parsing the response!");
                         }
@@ -106,13 +97,14 @@ public class BackendServiceClientImpl implements BackendServiceClient {
                         JSONValue value = JSONParser.parseStrict(response.getText());
                         if (value != null) {
                             JSONObject obj = value.isObject();
-                            status = parseStatus(obj);
+                            status = ParserUtil.parseStatus(obj);
                             if (status.getCode() == 200) {
                                 LOGGER.log(Level.INFO, "Continuing parsing...");
-                                result.setProfile(parseProfile(obj));
-                                result.setContacts(parseContacts(obj));
+                                result.setProfile(ParserUtil.parseProfile(obj));
+                                result.setContacts(ParserUtil.parseContacts(obj));
                                 result.setToken(response.getHeader(TOKEN_HEADER));
                                 result.setUserId(Long.valueOf(response.getHeader(USERID_HEADER)));
+                                result.setChannelToken(parseChannelToken(obj));
                             }
                         } else {
                             status = new Status(500, "Problem parsing the response!");
@@ -149,7 +141,7 @@ public class BackendServiceClientImpl implements BackendServiceClient {
                         JSONValue value = JSONParser.parseStrict(response.getText());
                         if (value != null) {
                             JSONObject obj = value.isObject();
-                            status = parseStatus(obj);
+                            status = ParserUtil.parseStatus(obj);
                         } else {
                             status = new Status(500, "Problem parsing the response!");
                         }
@@ -191,10 +183,10 @@ public class BackendServiceClientImpl implements BackendServiceClient {
                         JSONValue value = JSONParser.parseStrict(response.getText());
                         if (value != null) {
                             JSONObject obj = value.isObject();
-                            status = parseStatus(obj);
+                            status = ParserUtil.parseStatus(obj);
                             if (status.getCode() == 200) {
                                 LOGGER.log(Level.INFO, "Continuing parsing...");
-                                result.setContacts(parseContacts(obj));
+                                result.setContacts(ParserUtil.parseContacts(obj));
                             }
                         } else {
                             status = new Status(500, "Problem parsing the response!");
@@ -234,7 +226,7 @@ public class BackendServiceClientImpl implements BackendServiceClient {
                         JSONValue value = JSONParser.parseStrict(response.getText());
                         if (value != null) {
                             JSONObject obj = value.isObject();
-                            status = parseStatus(obj);
+                            status = ParserUtil.parseStatus(obj);
                         } else {
                             status = new Status(500, "Problem parsing the response!");
                         }
@@ -275,7 +267,7 @@ public class BackendServiceClientImpl implements BackendServiceClient {
                         JSONValue value = JSONParser.parseStrict(response.getText());
                         if (value != null) {
                             JSONObject obj = value.isObject();
-                            status = parseStatus(obj);
+                            status = ParserUtil.parseStatus(obj);
                         } else {
                             status = new Status(500, "Problem parsing the response!");
                         }
@@ -318,10 +310,10 @@ public class BackendServiceClientImpl implements BackendServiceClient {
                         JSONValue value = JSONParser.parseStrict(response.getText());
                         if (value != null) {
                             JSONObject obj = value.isObject();
-                            status = parseStatus(obj);
+                            status = ParserUtil.parseStatus(obj);
                             if (status.getCode() == 200) {
                                 LOGGER.log(Level.INFO, "Continuing parsing...");
-                                result.setProfile(parseProfile(obj));
+                                result.setProfile(ParserUtil.parseProfile(obj));
                             }
                         } else {
                             status = new Status(500, "Problem parsing the response!");
@@ -364,11 +356,11 @@ public class BackendServiceClientImpl implements BackendServiceClient {
                         JSONValue value = JSONParser.parseStrict(response.getText());
                         if (value != null) {
                             JSONObject obj = value.isObject();
-                            status = parseStatus(obj);
+                            status = ParserUtil.parseStatus(obj);
                             if (status.getCode() == 200) {
                                 LOGGER.log(Level.INFO, "Continuing parsing...");
-                                result.setAlerts(parseAlerts(obj));
-                                result.setMessages(parseMessages(obj));
+                                result.setAlerts(ParserUtil.parseAlerts(obj));
+                                result.setMessages(ParserUtil.parseMessages(obj));
                             }
                         } else {
                             status = new Status(500, "Problem parsing the response!");
@@ -412,7 +404,7 @@ public class BackendServiceClientImpl implements BackendServiceClient {
                         JSONValue value = JSONParser.parseStrict(response.getText());
                         if (value != null) {
                             JSONObject obj = value.isObject();
-                            status = parseStatus(obj);
+                            status = ParserUtil.parseStatus(obj);
                         } else {
                             status = new Status(500, "Problem parsing the response!");
                         }
@@ -455,7 +447,7 @@ public class BackendServiceClientImpl implements BackendServiceClient {
                         JSONValue value = JSONParser.parseStrict(response.getText());
                         if (value != null) {
                             JSONObject obj = value.isObject();
-                            status = parseStatus(obj);
+                            status = ParserUtil.parseStatus(obj);
                         } else {
                             status = new Status(500, "Problem parsing the response!");
                         }
@@ -498,7 +490,7 @@ public class BackendServiceClientImpl implements BackendServiceClient {
                         JSONValue value = JSONParser.parseStrict(response.getText());
                         if (value != null) {
                             JSONObject obj = value.isObject();
-                            status = parseStatus(obj);
+                            status = ParserUtil.parseStatus(obj);
                         } else {
                             status = new Status(500, "Problem parsing the response!");
                         }
@@ -532,125 +524,14 @@ public class BackendServiceClientImpl implements BackendServiceClient {
         return msg.toString();
     }
 
-    private List<Message> parseMessages(JSONObject response) {
-        LOGGER.log(Level.INFO, "Parsing Messages...");
-        JSONValue jsonMessagesValue = response.get("messages");
-        if (jsonMessagesValue != null) {
-            JSONArray jsonMessages = jsonMessagesValue.isArray();
-            if (jsonMessages != null) {
-                LOGGER.log(Level.INFO, "There is a Message obj.");
-                List<Message> messages = new ArrayList<Message>(jsonMessages.size());
-                for (int i=0;i<jsonMessages.size();i++) {
-                    JSONObject jsonMessage = jsonMessages.get(i).isObject();
-                    messages.add(parseMessage(jsonMessage));
-                }
-                return messages;
-            }
+
+
+    private String parseChannelToken(JSONObject response) {
+        LOGGER.log(Level.INFO, "Parsing channelToken...");
+        JSONValue jsonChannelTokenValue = response.get("channelToken");
+        if (jsonChannelTokenValue != null) {
+            return jsonChannelTokenValue.isString().stringValue();
         }
-        LOGGER.log(Level.INFO, "No Message obj.");
-        return null;
-    }
-
-    private List<Alert> parseAlerts(JSONObject response) {
-        LOGGER.log(Level.INFO, "Parsing Alerts...");
-        JSONValue jsonAlertsValue = response.get("alerts");
-        if (jsonAlertsValue != null) {
-            JSONArray jsonAlerts = jsonAlertsValue.isArray();
-            if (jsonAlerts != null) {
-                LOGGER.log(Level.INFO, "There is a Alert obj.");
-                List<Alert> alerts = new ArrayList<Alert>(jsonAlerts.size());
-                for (int i=0;i<jsonAlerts.size();i++) {
-                    JSONObject jsonAlert = jsonAlerts.get(i).isObject();
-                    alerts.add(parseAlert(jsonAlert));
-                }
-                return alerts;
-            }
-        }
-        LOGGER.log(Level.INFO, "No Alert obj.");
-        return null;
-    }
-
-    private List<Contact> parseContacts(JSONObject response) {
-        LOGGER.log(Level.INFO, "Parsing Contacts...");
-        JSONValue jsonContactsValue = response.get("contacts");
-        if (jsonContactsValue != null) {
-            JSONArray jsonContacts = jsonContactsValue.isArray();
-            if (jsonContacts != null) {
-                LOGGER.log(Level.INFO, "There is a Contacts obj.");
-                List<Contact> contacts = new ArrayList<Contact>(jsonContacts.size());
-                for (int i=0;i<jsonContacts.size();i++) {
-                    JSONObject jsonContact = jsonContacts.get(i).isObject();
-                    contacts.add(parseContact(jsonContact));
-                }
-                return contacts;
-            }
-        }
-        LOGGER.log(Level.INFO, "No Contacts obj.");
-        return null;
-    }
-
-    private Message parseMessage(JSONObject jsonMessage) {
-        LOGGER.log(Level.INFO, "One message found..." + jsonMessage);
-        Message message = new Message();
-        message.setText(JsonUtil.getStringValue(jsonMessage.get("text")));
-        message.setFrom(JsonUtil.getLongValue(jsonMessage.get("from")));
-        LOGGER.log(Level.INFO, "Returning message:" + message.toString());
-        return message;
-    }
-
-    private Alert parseAlert(JSONObject jsonAlert) {
-        LOGGER.log(Level.INFO, "One alert found..." + jsonAlert);
-        Alert alert = new Alert();
-        alert.setId(JsonUtil.getLongValue(jsonAlert.get("id")));
-        alert.setType(NotificationType.valueOf(JsonUtil.getStringValue(jsonAlert.get("type"))));
-        alert.setReferer(JsonUtil.getLongValue(jsonAlert.get("referer")));
-        if (NotificationType.CONTACT_INVITE == alert.getType()) {
-            alert.setData(parseContact(jsonAlert.get("data").isObject()));
-        } else if (NotificationType.PRESENCE == alert.getType()) {
-            alert.setData(parseContact(jsonAlert.get("data").isObject()));
-        }
-        LOGGER.log(Level.INFO, "Returning alert:" + alert.toString());
-        return alert;
-    }
-
-    private Contact parseContact(JSONObject jsonContact) {
-        LOGGER.log(Level.INFO, "One contact found..." + jsonContact);
-        Contact contact = new Contact();
-        contact.setId(JsonUtil.getLongValue(jsonContact.get("id")));
-        contact.setName(JsonUtil.getStringValue(jsonContact.get("name")));
-        contact.setPresence(Presence.valueOf(JsonUtil.getStringValue(jsonContact.get("presence"))));
-        LOGGER.log(Level.INFO, "Returning contact:" + contact);
-        return contact;
-    }
-
-    private Status parseStatus(JSONObject response) {
-        LOGGER.log(Level.INFO, "Parsing Status...");
-        JSONObject jsonStatus = response.get("status").isObject();
-        if (jsonStatus != null) {
-            LOGGER.log(Level.INFO, "There is a Status obj.");
-            Status status = new Status();
-            status.setCode(JsonUtil.getIntValue(jsonStatus.get("code")));
-            status.setDescription(JsonUtil.getStringValue(jsonStatus.get("description")));
-            LOGGER.log(Level.INFO, "Status created..." + status.toString());
-            return status;
-        } else {
-            LOGGER.log(Level.INFO, "No Status obj.");
-            return null;
-        }
-    }
-
-    private Profile parseProfile(JSONObject response) {
-        LOGGER.log(Level.INFO, "Parsing Profile...");
-        JSONObject jsonProfile = response.get("profile").isObject();
-        if (jsonProfile != null) {
-            LOGGER.log(Level.INFO, "There is a Profile obj.");
-            Profile profile = new Profile();
-            profile.setId(JsonUtil.getLongValue(jsonProfile.get("id")));
-            profile.setFullname(JsonUtil.getStringValue(jsonProfile.get("fullname")));
-            LOGGER.log(Level.INFO, "Returning profile:" + profile);
-            return profile;
-        }
-        LOGGER.log(Level.INFO, "No Profile obj.");
         return null;
     }
 

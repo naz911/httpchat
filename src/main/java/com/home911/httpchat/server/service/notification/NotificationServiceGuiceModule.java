@@ -7,5 +7,6 @@ public class NotificationServiceGuiceModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(NotificationService.class).to(NotificationServiceImpl.class).in(Singleton.class);
+        bind(NotificationPusher.class).to(NotificationPusherImpl.class).in(Singleton.class);
     }
 }

@@ -1,16 +1,18 @@
-package com.home911.httpchat.client.gui;
+package com.home911.httpchat.client.notif;
 
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.home911.httpchat.client.gui.MainView;
 import com.home911.httpchat.client.model.PollResult;
 import com.home911.httpchat.shared.model.Alert;
 import com.home911.httpchat.shared.model.Contact;
 
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class HttpChatTimer extends Timer {
-    private static final Logger LOGGER = Logger.getLogger(HttpChatTimer.class.getName());
+public class HttpChatNotifPollHandler extends Timer implements HttpChatNotifHandler {
+    private static final Logger LOGGER = Logger.getLogger(HttpChatNotifPollHandler.class.getName());
     private static final int RUN_DELAY = 30 * 1000;
 
     private Long userId;
@@ -20,13 +22,13 @@ public class HttpChatTimer extends Timer {
     private int failureCount = 0;
     private boolean isStop = false;
 
-    public HttpChatTimer(MainView mainView) {
+    public HttpChatNotifPollHandler(MainView mainView) {
         this.mainView = mainView;
     }
 
-    public void start(Long userId, String token) {
-        this.userId = userId;
-        this.token = token;
+    public void start(Map<String, Object> params) {
+        this.userId = (Long) params.get(USERID_PARAM);
+        this.token = (String) params.get(TOKEN_PARAM);
         this.isStop = false;
         schedule(RUN_DELAY);
     }
