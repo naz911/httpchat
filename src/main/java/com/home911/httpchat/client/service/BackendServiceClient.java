@@ -8,7 +8,7 @@ import com.home911.httpchat.shared.model.Profile;
 
 public interface BackendServiceClient {
     public void register(String username, String password, String email, AsyncCallback<StatusResult> callback);
-    public void login(String username, String password, AsyncCallback<LoginResult> callback);
+    public void login(String username, String password, Boolean usePush, AsyncCallback<LoginResult> callback);
     public void logout(Long userId, String token, AsyncCallback<StatusResult> callback);
     public void search(Long userId, String token, String filterValue, ContactFilterType filterType, AsyncCallback<ContactsResult> callback);
     public void addContact(Long userId, String token, Long contactId, AsyncCallback<StatusResult> callback);

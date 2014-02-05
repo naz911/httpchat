@@ -25,7 +25,7 @@ public class BackendServiceClientImpl implements BackendServiceClient {
     private static final String USERID_HEADER = "x-httpchat-userid";
 
     private static final String REGISTER_REQ = "{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\"}";
-    private static final String LOGIN_REQ = "{\"username\":\"%s\",\"password\":\"%s\"}";
+    private static final String LOGIN_REQ = "{\"username\":\"%s\",\"password\":\"%s\",\"usePush\":%b}";
     private static final String PROFILE_REQ = "{\"fullname\":\"%s\"}";
     private static final String MESSAGE_REQ = "{\"to\":%l,\"text\":\"%s\"}";
 
@@ -84,11 +84,11 @@ public class BackendServiceClientImpl implements BackendServiceClient {
     }
 
     @Override
-    public void login(String username, String password, final AsyncCallback<LoginResult> callback) {
+    public void login(String username, String password, Boolean usePush, final AsyncCallback<LoginResult> callback) {
         RequestBuilder reqBuilder = new RequestBuilder(RequestBuilder.POST, getBaseUrl() + "rest/login");
         reqBuilder.setHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE);
         try {
-            reqBuilder.sendRequest(format(LOGIN_REQ, username, password), new RequestCallback() {
+            reqBuilder.sendRequest(format(format(LOGIN_REQ, username, password), usePush), new RequestCallback() {
                 @Override
                 public void onResponseReceived(Request request, Response response) {
                     LOGGER.log(Level.INFO, "Login response received:" + response.getText());
@@ -571,6 +571,17 @@ public class BackendServiceClientImpl implements BackendServiceClient {
 
     private String format(final String format, final Long... args) {
         String[] split = format.split("%l");
+        final StringBuilder msg = new StringBuilder();
+        for (int pos = 0; pos < split.length - 1; pos += 1) {
+            msg.append(split[pos]);
+            msg.append(args[pos]);
+        }
+        msg.append(split[split.length - 1]);
+        return msg.toString();
+    }
+
+    private String format(final String format, final Boolean... args) {
+        String[] split = format.split("%b");
         final StringBuilder msg = new StringBuilder();
         for (int pos = 0; pos < split.length - 1; pos += 1) {
             msg.append(split[pos]);

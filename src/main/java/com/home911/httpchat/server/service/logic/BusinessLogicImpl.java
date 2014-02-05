@@ -82,7 +82,10 @@ public class BusinessLogicImpl implements BusinessLogic {
             }
             userService.saveUser(user);
 
-            String channelToken = notificationPusher.createChannel(String.valueOf(user.getId()));
+            String channelToken = null;
+            if (req.isUsePush()) {
+                channelToken = notificationPusher.createChannel(String.valueOf(user.getId()));
+            }
 
             Profile profile = new Profile();
             profile.setFullname(user.getUserInfo().getFullname());
@@ -618,7 +621,7 @@ public class BusinessLogicImpl implements BusinessLogic {
         }
     }
 
-    private void getOwnNotification(User user, StatusResponse resp, boolean withPush) {
+    private void getOwnNotification(User user, StatusResponse resp, boolean isLogin) {
         // get own notifications
         List<Notification> ownNotifications = notificationService.getNotifications(user);
         List<Notification> notifToRemove = new ArrayList<Notification>();
@@ -629,8 +632,8 @@ public class BusinessLogicImpl implements BusinessLogic {
                     notifToRemove.add(notif);
                 }
 
-                if (withPush && NotificationType.PRESENCE != notif.getType())
-                {
+                if ((isLogin && NotificationType.PRESENCE != notif.getType()) ||
+                        (!isLogin)) {
                     User contactUsr = notif.getReferer();
                     String name = StringUtils.isEmpty(contactUsr.getUserInfo().getFullname()) ? contactUsr.getUsername() :
                             contactUsr.getUserInfo().getFullname();

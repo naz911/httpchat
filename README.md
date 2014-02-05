@@ -9,7 +9,7 @@ Look at the HttpChatClient python script for the client API, currently supportin
     Login/Logout
     Alerts
         Poll
-        Push
+        Push ( disabled for the moment )
     Profile
         Update
         Get
@@ -33,7 +33,7 @@ Look at the HttpChatClient python script for the client API, currently supportin
             Send/Receive
         Alerts
             Poll
-            Push
+            Push ( disabled for the moment )
 
 Next Features:
 

@@ -15,6 +15,7 @@ import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.events.CloseClickEvent;
 import com.smartgwt.client.widgets.events.CloseClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
+import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.PasswordItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
@@ -96,18 +97,23 @@ public class LoginView extends Composite {
         usernameItem.setRequired(true);
 
         final PasswordItem passwordItem = new PasswordItem();
+        passwordItem.setTitle("Password");
+        passwordItem.setRequired(true);
+
+        final CheckboxItem usePushChk = new CheckboxItem();
+        usePushChk.setTitle("Use push?");
+        usePushChk.setDisabled(true);
+
         passwordItem.addKeyPressHandler(new KeyPressHandler() {
             @Override
             public void onKeyPress(KeyPressEvent keyPressEvent) {
                 if ("enter".equalsIgnoreCase(keyPressEvent.getKeyName())) {
-                    processLogin(usernameItem, passwordItem);
+                    processLogin(usernameItem, passwordItem, usePushChk);
                 }
             }
         });
-        passwordItem.setTitle("Password");
-        passwordItem.setRequired(true);
 
-        form.setFields(new FormItem[] {usernameItem, passwordItem});
+        form.setFields(new FormItem[] {usernameItem, passwordItem, usePushChk});
         loginWnd.addItem(form);
 
         HLayout buttons = new HLayout();
@@ -117,7 +123,7 @@ public class LoginView extends Composite {
         final IButton loginBtn = new IButton("Login");
         loginBtn.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-                processLogin(usernameItem, passwordItem);
+                processLogin(usernameItem, passwordItem, usePushChk);
             }
         });
         buttons.addMember(loginBtn);
@@ -146,13 +152,15 @@ public class LoginView extends Composite {
         registerLay.addChild(registerBtn);
     }
 
-    private void processLogin(final TextItem usernameItem, final PasswordItem passwordItem) {
+    private void processLogin(final TextItem usernameItem, final PasswordItem passwordItem,
+                              final CheckboxItem usePushChk) {
         mainView.getMenuView().writeStatus("");
         StringBuilder errorMsg = new StringBuilder("The following error(s) occured:<br/>");
         boolean isError = false;
         if (LOGGER.isLoggable(Level.INFO)) {
             LOGGER.log(Level.INFO, "Form submitted with username[" + usernameItem.getEnteredValue().trim() + "]," +
-                    " password[" + passwordItem.getEnteredValue().trim() + "]");
+                    " password[" + passwordItem.getEnteredValue().trim() + "]," +
+                    "usePush[" + usePushChk.getValueAsBoolean() + "]");
         }
         if (usernameItem.getEnteredValue().trim() == "") {
             isError = true;
@@ -168,7 +176,8 @@ public class LoginView extends Composite {
         } else {
             mainView.showLoading("Processing loading...");
             mainView.getBackendService().login(usernameItem.getEnteredValue().trim(),
-                    passwordItem.getEnteredValue().trim(), new AsyncCallback<LoginResult>() {
+                    passwordItem.getEnteredValue().trim(), usePushChk.getValueAsBoolean(),
+                    new AsyncCallback<LoginResult>() {
                 @Override
                 public void onFailure(Throwable throwable) {
                     mainView.hideLoading();

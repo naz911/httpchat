@@ -3,9 +3,11 @@ package com.home911.httpchat.client.notif;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.home911.httpchat.client.gui.MainView;
+import com.home911.httpchat.client.gui.MessageView;
 import com.home911.httpchat.client.model.PollResult;
 import com.home911.httpchat.shared.model.Alert;
 import com.home911.httpchat.shared.model.Contact;
+import com.home911.httpchat.shared.model.Message;
 
 import java.util.Map;
 import java.util.logging.Level;
@@ -77,6 +79,17 @@ public class HttpChatNotifPollHandler extends Timer implements HttpChatNotifHand
                                             LOGGER.log(Level.INFO, "Presence updated!");
                                         }
                                         break;
+                                }
+                            }
+                        }
+                        if (pollResult.getMessages() != null) {
+                            for (Message message : pollResult.getMessages()) {
+                                if (LOGGER.isLoggable(Level.INFO)) {
+                                    LOGGER.log(Level.INFO, "Message received:" + message.toString());
+                                    MessageView msgView = mainView.getConversation(userId, token,
+                                            message.getFrom().getId(),
+                                            message.getFrom().getName());
+                                    msgView.messageReceive(message);
                                 }
                             }
                         }
