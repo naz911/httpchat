@@ -23,6 +23,7 @@ public class MenuView extends Composite {
     private IButton profileBtn;
     private IButton searchBtn;
     //private IButton alertsBtn;
+    private IButton aboutBtn;
 
     public MenuView(MainView mainView) {
         this.mainView = mainView;
@@ -38,6 +39,7 @@ public class MenuView extends Composite {
         initWidget(menuWindow);
 
         addLoginMenu();
+        addAboutMenu();
     }
 
     public void writeStatus(String status) {
@@ -46,10 +48,12 @@ public class MenuView extends Composite {
 
     public void adjustAfterLogin(Long userId, String token, Profile profile) {
         menuWindow.removeItem(loginBtn);
+        menuWindow.removeItem(aboutBtn);
         addMyProfileMenu(userId, token, profile);
         addSearchContactMenu(userId, token);
         //addAlertsMenu(userId, token);
         addLogoutMenu(userId, token);
+        addAboutMenu();
         menuWindow.draw();
     }
 
@@ -58,7 +62,9 @@ public class MenuView extends Composite {
         menuWindow.removeItem(searchBtn);
         //menuWindow.removeItem(alertsBtn);
         menuWindow.removeItem(logoutBtn);
+        menuWindow.removeItem(aboutBtn);
         addLoginMenu();
+        addAboutMenu();
         menuWindow.draw();
     }
 
@@ -79,6 +85,25 @@ public class MenuView extends Composite {
             }
         });
         menuWindow.addItem(loginBtn);
+    }
+
+    private void addAboutMenu() {
+        aboutBtn = new IButton("About");
+        aboutBtn.setShowRollOver(true);
+        aboutBtn.setShowDisabled(true);
+        aboutBtn.setShowDown(true);
+        aboutBtn.setWidth(150);
+        aboutBtn.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent clickEvent) {
+                if (LOGGER.isLoggable(Level.INFO)) {
+                    LOGGER.log(Level.INFO, "About button clicked!...");
+                }
+                AboutView aboutView = new AboutView();
+                aboutView.display();
+            }
+        });
+        menuWindow.addItem(aboutBtn);
     }
 
     private void addLogoutMenu(final Long userId, final String token) {

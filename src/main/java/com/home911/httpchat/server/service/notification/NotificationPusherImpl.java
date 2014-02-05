@@ -3,6 +3,7 @@ package com.home911.httpchat.server.service.notification;
 import com.google.appengine.api.channel.ChannelMessage;
 import com.google.appengine.api.channel.ChannelService;
 import com.google.inject.Inject;
+import com.home911.httpchat.server.model.Message;
 import com.home911.httpchat.server.model.Notification;
 import com.home911.httpchat.server.model.User;
 import com.home911.httpchat.server.utils.GsonUtil;
@@ -39,15 +40,7 @@ public class NotificationPusherImpl implements NotificationPusher {
         if (LOGGER.isLoggable(Level.INFO)) {
             LOGGER.log(Level.INFO, "Generation notification for:" + push);
         }
-        String jsonPush = GsonUtil.getInstance().getGson().toJson(push);
-        String destination = String.valueOf(notification.getOwner().getId());
-        if (LOGGER.isLoggable(Level.INFO)) {
-            LOGGER.log(Level.INFO, "Pushing notification for:" + push);
-        }
-        channelService.sendMessage(new ChannelMessage(destination, jsonPush));
-        if (LOGGER.isLoggable(Level.INFO)) {
-            LOGGER.log(Level.INFO, "Pushed notification!");
-        }
+        internalPush(notification.getOwner().getId(), push);
     }
 
     @Override
@@ -60,6 +53,41 @@ public class NotificationPusherImpl implements NotificationPusher {
                 push(notif);
             }
         }
+    }
+
+    @Override
+    public void push(Message message) {
+        if (LOGGER.isLoggable(Level.INFO)) {
+            LOGGER.log(Level.INFO, "Generation message for:" + message);
+        }
+        Push push = convertMessage(message);
+        if (LOGGER.isLoggable(Level.INFO)) {
+            LOGGER.log(Level.INFO, "Generation notification for:" + push);
+        }
+        internalPush(message.getTo().getId(), push);
+    }
+
+    private void internalPush(Long to, Push push) {
+        String jsonPush = GsonUtil.getInstance().getGson().toJson(push);
+        String destination = String.valueOf(to);
+        if (LOGGER.isLoggable(Level.INFO)) {
+            LOGGER.log(Level.INFO, "Pushing notification for:" + push);
+        }
+        channelService.sendMessage(new ChannelMessage(destination, jsonPush));
+        if (LOGGER.isLoggable(Level.INFO)) {
+            LOGGER.log(Level.INFO, "Pushed notification!");
+        }
+    }
+
+    private Push convertMessage(Message message) {
+        Push push = new Push();
+        User from = message.getFrom();
+        String name = StringUtils.isEmpty(from.getUserInfo().getFullname()) ? from.getUsername() :
+                from.getUserInfo().getFullname();
+        push.setMessage(new com.home911.httpchat.shared.model.Message(
+                new Contact(from.getId(), name, from.getPresence()),
+                message.getText()));
+        return push;
     }
 
     private Push convertNotification(Notification notification) {

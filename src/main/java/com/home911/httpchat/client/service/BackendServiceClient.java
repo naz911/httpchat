@@ -3,6 +3,7 @@ package com.home911.httpchat.client.service;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.home911.httpchat.client.model.*;
 import com.home911.httpchat.shared.model.ContactFilterType;
+import com.home911.httpchat.shared.model.Message;
 import com.home911.httpchat.shared.model.Profile;
 
 public interface BackendServiceClient {
@@ -17,4 +18,5 @@ public interface BackendServiceClient {
     public void acceptInvite(Long userId, String token, Long id, AsyncCallback<StatusResult> callback);
     public void denyInvite(Long userId, String token, Long id, AsyncCallback<StatusResult> callback);
     public void removeContact(Long userId, String token, Long id, AsyncCallback<StatusResult> callback);
+    public void send(Long userId, String token, Message message, AsyncCallback<StatusResult> callback);
 }

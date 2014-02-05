@@ -63,13 +63,15 @@ public class ContactListView extends Composite {
         }
     }
 
-    public ContactListView(MainView mainView, Long userId, String token) {
+    public ContactListView(final MainView mainView, final Long userId, final String token) {
         this.mainView = mainView;
         this.userId = userId;
         this.token = token;
         contactWnd = new Window();
         contactWnd.setTitle("HttpChat Contacts");
         contactWnd.setAutoSize(true);
+        contactWnd.setTop(-220);
+        contactWnd.setLeft(155);
         contactWnd.setAnimateMinimize(true);
         contactWnd.setCanDragResize(false);
         contactWnd.setCanDragReposition(true);
@@ -91,12 +93,14 @@ public class ContactListView extends Composite {
             public void onRecordDoubleClick(RecordDoubleClickEvent event) {
                 LOGGER.log(Level.INFO, "Doubled clicked will open conversation for contact["
                         + event.getRecord().getAttributeAsLong("id") + "]");
+                mainView.showConversation(userId, token, event.getRecord().getAttributeAsLong("id"), event.getRecord().getAttribute("name"));
             }
         });
 
         contactsGrid.addRowContextClickHandler(new RowContextClickHandler() {
             public void onRowContextClick(RowContextClickEvent event) {
-                Menu contactPopup = createContactPopup(event.getRecord().getAttributeAsLong("id"));
+                Menu contactPopup = createContactPopup(event.getRecord().getAttributeAsLong("id"),
+                        event.getRecord().getAttribute("name"));
                 // Show the popup
                 contactPopup.showContextMenu();
                 event.cancel();
@@ -167,7 +171,7 @@ public class ContactListView extends Composite {
         }
     }
 
-    private Menu createContactPopup(final Long id) {
+    private Menu createContactPopup(final Long id, final String name) {
         if (LOGGER.isLoggable(Level.INFO)) {
             LOGGER.log(Level.INFO, "Creating contact popup menu for id[" + id + "]");
         }
@@ -246,6 +250,7 @@ public class ContactListView extends Composite {
             @Override
             public void onClick(MenuItemClickEvent menuItemClickEvent) {
                 LOGGER.log(Level.INFO, "Conversation clicked for contact[" + id + "]");
+                mainView.showConversation(userId, token, id, name);
             }
         });
 

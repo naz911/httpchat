@@ -4,13 +4,13 @@ import java.io.Serializable;
 
 public class Message implements Serializable {
     private Long to;
-    private Long from;
+    private Contact from;
     private String text;
 
     public Message() {
     }
 
-    public Message(Long from, String text) {
+    public Message(Contact from, String text) {
         this.from = from;
         this.text = text;
     }
@@ -23,11 +23,11 @@ public class Message implements Serializable {
         this.to = to;
     }
 
-    public Long getFrom() {
+    public Contact getFrom() {
         return from;
     }
 
-    public void setFrom(Long from) {
+    public void setFrom(Contact from) {
         this.from = from;
     }
 

@@ -135,7 +135,7 @@ public class BusinessLogicImpl implements BusinessLogic {
                 notificationPusher.push(pushNotifications);
             }
 
-            //getOwnNotification(user, resp);
+            getOwnNotification(user, resp, true);
 
             return new ResponseEvent<LoginResponse>(resp);
 
@@ -441,7 +441,11 @@ public class BusinessLogicImpl implements BusinessLogic {
             List<com.home911.httpchat.shared.model.Message> msgs =
                     new ArrayList<com.home911.httpchat.shared.model.Message>(messages.size());
             for (Message message : messages) {
-                msgs.add(new com.home911.httpchat.shared.model.Message(message.getFrom().getId(), message.getText()));
+                String name = message.getFrom().getUserInfo() != null &&
+                        StringUtils.isEmpty(message.getFrom().getUserInfo().getFullname()) ?
+                        message.getFrom().getUsername() : message.getFrom().getUserInfo().getFullname();
+                msgs.add(new com.home911.httpchat.shared.model.Message(
+                        new Contact(message.getFrom().getId(), name, message.getFrom().getPresence()), message.getText()));
             }
             resp.setMessages(msgs);
             messageService.removeMessages(user, messages);
@@ -504,8 +508,13 @@ public class BusinessLogicImpl implements BusinessLogic {
         User user = userService.getUser(requestEvent.getUserId());
         User to = userService.getUser(req.getMessage().getTo());
 
+        Message msg = new Message(to, user, req.getMessage().getText());
         if (Presence.ONLINE == to.getPresence()) {
-            messageService.saveMessage(new Message(to, user, req.getMessage().getText()));
+            if (to.isAvailableForPush()) {
+                notificationPusher.push(msg);
+            } else {
+                messageService.saveMessage(msg);
+            }
             return new ResponseEvent<StatusResponse>(new StatusResponse(HttpStatus.SC_OK,
                     "Send Message successful"));
         } else {
@@ -609,7 +618,7 @@ public class BusinessLogicImpl implements BusinessLogic {
         }
     }
 
-    private void getOwnNotification(User user, StatusResponse resp) {
+    private void getOwnNotification(User user, StatusResponse resp, boolean withPush) {
         // get own notifications
         List<Notification> ownNotifications = notificationService.getNotifications(user);
         List<Notification> notifToRemove = new ArrayList<Notification>();
@@ -619,16 +628,24 @@ public class BusinessLogicImpl implements BusinessLogic {
                 if (NotificationType.PRESENCE == notif.getType()) {
                     notifToRemove.add(notif);
                 }
-                User contactUsr = notif.getReferer();
-                String name = StringUtils.isEmpty(contactUsr.getUserInfo().getFullname()) ? contactUsr.getUsername() :
-                        contactUsr.getUserInfo().getFullname();
-                alerts.add(new Alert(notif.getId(), notif.getType(), notif.getReferer().getId(),
-                        new Contact(contactUsr.getId(), name, contactUsr.getPresence())));
+
+                if (withPush && NotificationType.PRESENCE != notif.getType())
+                {
+                    User contactUsr = notif.getReferer();
+                    String name = StringUtils.isEmpty(contactUsr.getUserInfo().getFullname()) ? contactUsr.getUsername() :
+                            contactUsr.getUserInfo().getFullname();
+                    alerts.add(new Alert(notif.getId(), notif.getType(), notif.getReferer().getId(),
+                            new Contact(contactUsr.getId(), name, contactUsr.getPresence())));
+                }
             }
             resp.setAlerts(alerts);
         }
         if (!notifToRemove.isEmpty()) {
             notificationService.removeNotifications(user, notifToRemove);
         }
+    }
+
+    private void getOwnNotification(User user, StatusResponse resp) {
+        getOwnNotification(user, resp, false);
     }
 }

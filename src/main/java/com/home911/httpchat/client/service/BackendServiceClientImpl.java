@@ -10,6 +10,7 @@ import com.home911.httpchat.client.model.*;
 import com.home911.httpchat.client.utils.Base64Coder;
 import com.home911.httpchat.client.utils.ParserUtil;
 import com.home911.httpchat.shared.model.ContactFilterType;
+import com.home911.httpchat.shared.model.Message;
 import com.home911.httpchat.shared.model.Profile;
 import com.home911.httpchat.shared.model.Status;
 
@@ -26,6 +27,7 @@ public class BackendServiceClientImpl implements BackendServiceClient {
     private static final String REGISTER_REQ = "{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\"}";
     private static final String LOGIN_REQ = "{\"username\":\"%s\",\"password\":\"%s\"}";
     private static final String PROFILE_REQ = "{\"fullname\":\"%s\"}";
+    private static final String MESSAGE_REQ = "{\"to\":%l,\"text\":\"%s\"}";
 
     private final MainView mainView;
     private final String baseUrl;
@@ -102,6 +104,7 @@ public class BackendServiceClientImpl implements BackendServiceClient {
                                 LOGGER.log(Level.INFO, "Continuing parsing...");
                                 result.setProfile(ParserUtil.parseProfile(obj));
                                 result.setContacts(ParserUtil.parseContacts(obj));
+                                result.setAlerts(ParserUtil.parseAlerts(obj));
                                 result.setToken(response.getHeader(TOKEN_HEADER));
                                 result.setUserId(Long.valueOf(response.getHeader(USERID_HEADER)));
                                 result.setChannelToken(parseChannelToken(obj));
@@ -513,6 +516,48 @@ public class BackendServiceClientImpl implements BackendServiceClient {
         }
     }
 
+    @Override
+    public void send(Long userId, String token, Message message, final AsyncCallback<StatusResult> callback) {
+        LOGGER.log(Level.INFO, "send called!");
+        StringBuilder urlPath = new StringBuilder("rest/secure/message");
+        RequestBuilder reqBuilder = new RequestBuilder(RequestBuilder.POST, getBaseUrl() + urlPath.toString());
+        reqBuilder.setHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE);
+        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(userId, token));
+        try {
+            reqBuilder.sendRequest(format(format(MESSAGE_REQ, message.getTo()), message.getText()), new RequestCallback() {
+                @Override
+                public void onResponseReceived(Request request, Response response) {
+                    LOGGER.log(Level.INFO, "send response received:" + response);
+                    StatusResult result = new StatusResult();
+                    Status status;
+                    if (200 == response.getStatusCode()) {
+                        LOGGER.log(Level.INFO, "send response success...");
+                        JSONValue value = JSONParser.parseStrict(response.getText());
+                        if (value != null) {
+                            JSONObject obj = value.isObject();
+                            status = ParserUtil.parseStatus(obj);
+                        } else {
+                            status = new Status(500, "Problem parsing the response!");
+                        }
+                    } else {
+                        LOGGER.log(Level.INFO, "send response failure...");
+                        status = new Status(response.getStatusCode(), response.getStatusText());
+                    }
+
+                    result.setStatus(status);
+                    callback.onSuccess(result);
+                }
+
+                @Override
+                public void onError(Request request, Throwable throwable) {
+                    callback.onFailure(throwable);
+                }
+            });
+        } catch (RequestException e) {
+            callback.onFailure(e);
+        }
+    }
+
     private String format(final String format, final String... args) {
         String[] split = format.split("%s");
         final StringBuilder msg = new StringBuilder();
@@ -524,6 +569,16 @@ public class BackendServiceClientImpl implements BackendServiceClient {
         return msg.toString();
     }
 
+    private String format(final String format, final Long... args) {
+        String[] split = format.split("%l");
+        final StringBuilder msg = new StringBuilder();
+        for (int pos = 0; pos < split.length - 1; pos += 1) {
+            msg.append(split[pos]);
+            msg.append(args[pos]);
+        }
+        msg.append(split[split.length - 1]);
+        return msg.toString();
+    }
 
 
     private String parseChannelToken(JSONObject response) {

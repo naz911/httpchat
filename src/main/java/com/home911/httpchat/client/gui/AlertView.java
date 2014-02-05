@@ -76,15 +76,14 @@ public class AlertView extends Composite {
         this.token = token;
         alertWnd = new Window();
         alertWnd.setTitle("HttpChat Alerts");
-        alertWnd.centerInPage();
-        alertWnd.setTop(0);
         alertWnd.setAnimateMinimize(true);
         alertWnd.setAutoSize(true);
+        alertWnd.setTop(-500);
+        alertWnd.setLeft(480);
         alertWnd.setCanDragResize(false);
         alertWnd.setShowCloseButton(false);
         alertWnd.setShowMaximizeButton(false);
         alertWnd.setShowMinimizeButton(true);
-        initWidget(alertWnd);
 
         alertWnd.addCloseClickHandler(new CloseClickHandler() {
             public void onCloseClick(CloseClickEvent event) {
@@ -129,6 +128,8 @@ public class AlertView extends Composite {
         alertsGrid.setCanResizeFields(true);
         alertsGrid.hideFields(idField, fromIdField, fromPresenceField);
         alertWnd.addItem(alertsGrid);
+
+        initWidget(alertWnd);
     }
 
     public void display() {

@@ -169,17 +169,20 @@ public class RegisterView extends Composite {
         if (isError) {
             registerMsg.setContents(errorMsg.toString());
         } else {
+            mainView.showLoading("Processing registration...");
             mainView.getBackendService().register(usernameItem.getEnteredValue().trim(),
                     passwordItem.getEnteredValue().trim(),
                     emailItem.getEnteredValue().trim(), new AsyncCallback<StatusResult>() {
                 @Override
                 public void onFailure(Throwable throwable) {
+                    mainView.hideLoading();
                     LOGGER.log(Level.SEVERE, "An unexpected error has occured.", throwable);
                     registerMsg.setContents("An unexpected error has occured.");
                 }
 
                 @Override
                 public void onSuccess(final StatusResult statusResult) {
+                    mainView.hideLoading();
                     if (LOGGER.isLoggable(Level.INFO)) {
                         LOGGER.log(Level.INFO, "Received statusResult:" + statusResult.toString());
                     }

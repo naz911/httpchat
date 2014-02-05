@@ -45,9 +45,9 @@ public class ProfileView extends Composite {
         this.profile = profile;
         profileWnd = new Window();
         profileWnd.setTitle("HttpChat Profile");
-        profileWnd.centerInPage();
-        profileWnd.setTop(0);
         profileWnd.setAutoSize(true);
+        profileWnd.setTop(-500);
+        profileWnd.setLeft(300);
         profileWnd.setCanDragResize(false);
         profileWnd.setShowCloseButton(true);
         profileWnd.setShowMaximizeButton(false);

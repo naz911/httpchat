@@ -77,7 +77,7 @@ public final class ParserUtil {
         LOGGER.log(Level.INFO, "One message found..." + jsonMessage);
         Message message = new Message();
         message.setText(JsonUtil.getStringValue(jsonMessage.get("text")));
-        message.setFrom(JsonUtil.getLongValue(jsonMessage.get("from")));
+        message.setFrom(parseContact(jsonMessage.get("from").isObject()));
         LOGGER.log(Level.INFO, "Returning message:" + message.toString());
         return message;
     }

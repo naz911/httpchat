@@ -55,8 +55,8 @@ public class SearchContactView extends Composite {
         this.token = token;
         searchWnd = new Window();
         searchWnd.setTitle("HttpChat Search Contacts");
-        searchWnd.centerInPage();
-        searchWnd.setTop(0);
+        searchWnd.setTop(-600);
+        searchWnd.setLeft(300);
         searchWnd.setAutoSize(true);
         searchWnd.setCanDragResize(false);
         searchWnd.setShowCloseButton(true);
@@ -64,7 +64,6 @@ public class SearchContactView extends Composite {
         searchWnd.setShowMinimizeButton(false);
         searchWnd.setIsModal(true);
         searchWnd.setShowModalMask(true);
-        initWidget(searchWnd);
 
         searchWnd.addCloseClickHandler(new CloseClickHandler() {
             public void onCloseClick(CloseClickEvent event) {
@@ -72,8 +71,11 @@ public class SearchContactView extends Composite {
             }
         });
 
+        LOGGER.log(Level.INFO, "Creating...");
         contactsGrid = new ListGrid();
         createSearchWindow();
+
+        initWidget(searchWnd);
     }
 
     public void display() {
@@ -160,45 +162,45 @@ public class SearchContactView extends Composite {
         IButton searchBtn = new IButton("Search");
         searchBtn.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
-            StringBuilder errorMsg = new StringBuilder("The following error(s) occured:<br/>");
-            boolean isError = false;
-            if (LOGGER.isLoggable(Level.INFO)) {
-                LOGGER.log(Level.INFO, "Form submitted with filterValue[" + filterValueItem.getEnteredValue().trim() + "]," +
-                        " filterType[" + filterTypeLst.getEnteredValue() + "]");
-            }
-            if (filterValueItem.getEnteredValue().trim() == "") {
-                isError = true;
-                errorMsg.append("- Filter Value field is empty<br/>");
-            }
-            if (filterTypeLst.getEnteredValue().trim() == "") {
-                isError = true;
-                errorMsg.append("- Filter Type field is empty<br/>");
-            }
+                StringBuilder errorMsg = new StringBuilder("The following error(s) occured:<br/>");
+                boolean isError = false;
+                if (LOGGER.isLoggable(Level.INFO)) {
+                    LOGGER.log(Level.INFO, "Form submitted with filterValue[" + filterValueItem.getEnteredValue().trim() + "]," +
+                            " filterType[" + filterTypeLst.getEnteredValue() + "]");
+                }
+                if (filterValueItem.getEnteredValue().trim() == "") {
+                    isError = true;
+                    errorMsg.append("- Filter Value field is empty<br/>");
+                }
+                if (filterTypeLst.getEnteredValue().trim() == "") {
+                    isError = true;
+                    errorMsg.append("- Filter Type field is empty<br/>");
+                }
 
-            if (isError) {
-                searchMsg.setContents(errorMsg.toString());
-            } else {
-                mainView.getBackendService().search(userId, token, filterValueItem.getEnteredValue().trim(),
-                    ContactFilterType.valueOf(filterTypeLst.getEnteredValue().trim()),
-                        new AsyncCallback<ContactsResult>() {
-                            @Override
-                            public void onFailure(Throwable throwable) {
-                                LOGGER.log(Level.SEVERE, "An unexpected error has occured.", throwable);
-                                searchMsg.setContents("An unexpected error has occured.");
-                            }
+                if (isError) {
+                    searchMsg.setContents(errorMsg.toString());
+                } else {
+                    mainView.getBackendService().search(userId, token, filterValueItem.getEnteredValue().trim(),
+                            ContactFilterType.valueOf(filterTypeLst.getEnteredValue().trim()),
+                            new AsyncCallback<ContactsResult>() {
+                                @Override
+                                public void onFailure(Throwable throwable) {
+                                    LOGGER.log(Level.SEVERE, "An unexpected error has occured.", throwable);
+                                    searchMsg.setContents("An unexpected error has occured.");
+                                }
 
-                            @Override
-                            public void onSuccess(final ContactsResult result) {
-                                if (LOGGER.isLoggable(Level.INFO)) {
-                                    LOGGER.log(Level.INFO, "Received contactsResult:" + result.toString());
+                                @Override
+                                public void onSuccess(final ContactsResult result) {
+                                    if (LOGGER.isLoggable(Level.INFO)) {
+                                        LOGGER.log(Level.INFO, "Received contactsResult:" + result.toString());
+                                    }
+                                    searchMsg.setContents(result.getStatus().getDescription());
+                                    if (result.getStatus().getCode() == 200) {
+                                        populateSearchResults(result.getContacts(), contactsGrid);
+                                    }
                                 }
-                                searchMsg.setContents(result.getStatus().getDescription());
-                                if (result.getStatus().getCode() == 200) {
-                                    populateSearchResults(result.getContacts(), contactsGrid);
-                                }
-                            }
-                        });
-            }
+                            });
+                }
             }
         });
 
@@ -250,25 +252,25 @@ public class SearchContactView extends Composite {
                     public void execute(Boolean value) {
                         if (value != null && value) {
                             mainView.getBackendService().addContact(userId, token, contact.getId(),
-                                new AsyncCallback<StatusResult>() {
-                                    @Override
-                                    public void onFailure(Throwable throwable) {
-                                        LOGGER.log(Level.SEVERE, "An unexpected error has occured.", throwable);
-                                        mainView.getMenuView().writeStatus("An unexpected error has occured.");
-                                    }
+                                    new AsyncCallback<StatusResult>() {
+                                        @Override
+                                        public void onFailure(Throwable throwable) {
+                                            LOGGER.log(Level.SEVERE, "An unexpected error has occured.", throwable);
+                                            mainView.getMenuView().writeStatus("An unexpected error has occured.");
+                                        }
 
-                                    @Override
-                                    public void onSuccess(StatusResult result) {
-                                        if (LOGGER.isLoggable(Level.INFO)) {
-                                            LOGGER.log(Level.INFO, "Received statusResult:" + result.toString());
+                                        @Override
+                                        public void onSuccess(StatusResult result) {
+                                            if (LOGGER.isLoggable(Level.INFO)) {
+                                                LOGGER.log(Level.INFO, "Received statusResult:" + result.toString());
+                                            }
+                                            mainView.getMenuView().writeStatus(result.getStatus().getDescription());
+                                            if (result.getStatus().getCode() == 200) {
+                                                mainView.getContactListView().addContactToList(contact);
+                                                contactsGrid.removeData(contactRec);
+                                            }
                                         }
-                                        mainView.getMenuView().writeStatus(result.getStatus().getDescription());
-                                        if (result.getStatus().getCode() == 200) {
-                                            mainView.getContactListView().addContactToList(contact);
-                                            contactsGrid.removeData(contactRec);
-                                        }
-                                    }
-                                });
+                                    });
                         }
                     }
                 });

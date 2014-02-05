@@ -4,6 +4,7 @@ import com.google.gwt.appengine.channel.client.*;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.home911.httpchat.client.gui.MainView;
+import com.home911.httpchat.client.gui.MessageView;
 import com.home911.httpchat.client.utils.ParserUtil;
 import com.home911.httpchat.shared.model.Contact;
 import com.home911.httpchat.shared.model.Push;
@@ -25,7 +26,6 @@ public class HttpChatNotifPushHandler implements HttpChatNotifHandler {
     public HttpChatNotifPushHandler(MainView mainView) {
         this.mainView = mainView;
     }
-
 
     @Override
     public void start(Map<String, Object> params) {
@@ -79,7 +79,13 @@ public class HttpChatNotifPushHandler implements HttpChatNotifHandler {
                                             break;
                                     }
                                 } else if (push.getMessage() != null) {
-                                    LOGGER.log(Level.INFO, "Will be implemented shortly...");
+                                    if (LOGGER.isLoggable(Level.INFO)) {
+                                        LOGGER.log(Level.INFO, "Message received:" + push.getMessage().toString());
+                                        MessageView msgView = mainView.getConversation(userId, token,
+                                                push.getMessage().getFrom().getId(),
+                                                push.getMessage().getFrom().getName());
+                                        msgView.messageReceive(push.getMessage());
+                                    }
                                 }
                             } else {
                                 LOGGER.log(Level.WARNING, "HttpChat Push message discarded:empty");

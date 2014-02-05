@@ -18,13 +18,16 @@ public class MainView extends Composite {
 
     private final BackendServiceClientImpl service;
     private final MenuView menuView;
+    private final LoadingView loadingView;
 
     private ContactListView contactListView;
     private AlertView alertsView;
     private HttpChatNotifHandler notifHandler;
+    private Map<Long, MessageView> conversations = new HashMap<Long, MessageView>();
 
     public MainView(BackendServiceClientImpl service) {
         this.service = service;
+        this.loadingView = new LoadingView();
         Canvas canvas = new Canvas();
         this.menuView = new MenuView(this);
 
@@ -48,6 +51,37 @@ public class MainView extends Composite {
         return contactListView;
     }
 
+    public void showLoading(String label) {
+        loadingView.display(label);
+    }
+
+    public void hideLoading() {
+        loadingView.hide();
+    }
+
+    public void showConversation(Long userId, String token, Long contactId, String contactName) {
+        MessageView msgView = conversations.get(contactId);
+
+        if (msgView == null) {
+            msgView = new MessageView(this, contactName, contactId, userId, token);
+            conversations.put(contactId, msgView);
+        }
+
+        msgView.display();
+    }
+
+    public MessageView getConversation(Long userId, String token, Long contactId, String contactName) {
+        MessageView msgView = conversations.get(contactId);
+
+        if (msgView == null) {
+            msgView = new MessageView(this, contactName, contactId, userId, token);
+            conversations.put(contactId, msgView);
+        }
+        msgView.setTitle(contactName);
+
+        return msgView;
+    }
+
     public void login(Long userId, String token, String channelToken) {
         contactListView = new ContactListView(this, userId, token);
         alertsView = new AlertView(this, userId, token);
@@ -65,9 +99,13 @@ public class MainView extends Composite {
     }
 
     public void logout() {
+        stopNotifHandler();
         contactListView.hide();
         alertsView.hide();
-        stopNotifHandler();
+        for (MessageView msgView : conversations.values()) {
+            msgView.hide();
+        }
+        conversations.clear();
     }
 
     private void openChannel(Long userId, String token, String channelToken) {

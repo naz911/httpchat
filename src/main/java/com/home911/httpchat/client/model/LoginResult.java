@@ -1,5 +1,6 @@
 package com.home911.httpchat.client.model;
 
+import com.home911.httpchat.shared.model.Alert;
 import com.home911.httpchat.shared.model.Contact;
 import com.home911.httpchat.shared.model.Profile;
 
@@ -11,6 +12,7 @@ public class LoginResult extends StatusResult {
     private String channelToken;
     private Profile profile;
     private List<Contact> contacts;
+    private List<Alert> alerts;
 
     public Long getUserId() {
         return userId;
@@ -52,6 +54,14 @@ public class LoginResult extends StatusResult {
         this.channelToken = channelToken;
     }
 
+    public List<Alert> getAlerts() {
+        return alerts;
+    }
+
+    public void setAlerts(List<Alert> alerts) {
+        this.alerts = alerts;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("LoginResult{");
@@ -60,6 +70,7 @@ public class LoginResult extends StatusResult {
         sb.append(", channelToken='").append(channelToken).append('\'');
         sb.append(", profile=").append(profile);
         sb.append(", contacts=").append(contacts);
+        sb.append(", alerts=").append(alerts);
         sb.append('}');
         return sb.toString();
     }

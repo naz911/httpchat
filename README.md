@@ -23,20 +23,23 @@ Look at the HttpChatClient python script for the client API, currently supportin
     GUI
         Login/Logout
         Register
+        About
         Contact
             Search
             Invite
             Remove
             Accept/Deny
+        Message
+            Send/Receive
         Alerts
             Poll
             Push
 
 Next Features:
+
     GUI
-        Message
-            Send/Receive
         Enhance (images, colors)
+        Preference ( theme, language )
     Profile
         Improve (add more detail)
     Group

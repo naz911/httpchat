@@ -3,6 +3,8 @@ package com.home911.httpchat.client.gui;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.home911.httpchat.client.model.LoginResult;
+import com.home911.httpchat.shared.model.Alert;
+import com.home911.httpchat.shared.model.NotificationType;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.widgets.IButton;
@@ -112,14 +114,14 @@ public class LoginView extends Composite {
         buttons.setLayoutAlign(Alignment.CENTER);
         buttons.setHeight(30);
         loginWnd.addItem(buttons);
-        IButton loginBtn = new IButton("Login");
+        final IButton loginBtn = new IButton("Login");
         loginBtn.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 processLogin(usernameItem, passwordItem);
             }
         });
         buttons.addMember(loginBtn);
-        IButton resetBtn = new IButton("Reset");
+        final IButton resetBtn = new IButton("Reset");
         resetBtn.addClickHandler(new ClickHandler() {
             public void onClick(ClickEvent event) {
                 form.reset();
@@ -164,16 +166,19 @@ public class LoginView extends Composite {
         if (isError) {
             loginMsg.setContents(errorMsg.toString());
         } else {
+            mainView.showLoading("Processing loading...");
             mainView.getBackendService().login(usernameItem.getEnteredValue().trim(),
                     passwordItem.getEnteredValue().trim(), new AsyncCallback<LoginResult>() {
                 @Override
                 public void onFailure(Throwable throwable) {
+                    mainView.hideLoading();
                     LOGGER.log(Level.SEVERE, "An unexpected error has occured.", throwable);
                     loginMsg.setContents("An unexpected error has occured.");
                 }
 
                 @Override
                 public void onSuccess(final LoginResult loginResult) {
+                    mainView.hideLoading();
                     if (LOGGER.isLoggable(Level.INFO)) {
                         LOGGER.log(Level.INFO, "Received loginResult:" + loginResult.toString());
                     }
@@ -190,6 +195,20 @@ public class LoginView extends Composite {
                             LOGGER.log(Level.INFO, "Populating contacts");
                         }
                         mainView.getContactListView().populateContactList(loginResult.getContacts());
+
+                        if (LOGGER.isLoggable(Level.INFO)) {
+                            LOGGER.log(Level.INFO, "Populating contacts");
+                        }
+                        if (loginResult.getAlerts() != null) {
+                            for (Alert alert : loginResult.getAlerts()) {
+                                if (NotificationType.CONTACT_INVITE == alert.getType()) {
+                                    if (LOGGER.isLoggable(Level.INFO)) {
+                                        LOGGER.log(Level.INFO, "Got a Contact_Invite...");
+                                    }
+                                    mainView.getAlertView().addAlert(alert);
+                                }
+                            }
+                        }
                     } else {
                         loginMsg.setContents(loginResult.getStatus().getDescription());
                     }
