@@ -22,7 +22,6 @@ public class BackendServiceClientImpl implements BackendServiceClient {
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
     private static final String CONTENT_TYPE = "application/json";
     private static final String TOKEN_HEADER = "x-httpchat-token";
-    private static final String USERID_HEADER = "x-httpchat-userid";
 
     private static final String REGISTER_REQ = "{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\"}";
     private static final String LOGIN_REQ = "{\"username\":\"%s\",\"password\":\"%s\",\"usePush\":%b}";
@@ -106,7 +105,6 @@ public class BackendServiceClientImpl implements BackendServiceClient {
                                 result.setContacts(ParserUtil.parseContacts(obj));
                                 result.setAlerts(ParserUtil.parseAlerts(obj));
                                 result.setToken(response.getHeader(TOKEN_HEADER));
-                                result.setUserId(Long.valueOf(response.getHeader(USERID_HEADER)));
                                 result.setChannelToken(parseChannelToken(obj));
                             }
                         } else {
@@ -130,10 +128,10 @@ public class BackendServiceClientImpl implements BackendServiceClient {
     }
 
     @Override
-    public void logout(Long userId, String token, final AsyncCallback<StatusResult> callback) {
+    public void logout(String token, final AsyncCallback<StatusResult> callback) {
         RequestBuilder reqBuilder = new RequestBuilder(RequestBuilder.POST, getBaseUrl() + "rest/secure/logout");
         reqBuilder.setHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE);
-        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(userId, token));
+        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(token));
         try {
             reqBuilder.sendRequest("", new RequestCallback() {
                 @Override
@@ -167,7 +165,7 @@ public class BackendServiceClientImpl implements BackendServiceClient {
     }
 
     @Override
-    public void search(Long userId, String token, String filterValue,
+    public void search(String token, String filterValue,
                        ContactFilterType filterType, final AsyncCallback<ContactsResult> callback) {
         StringBuilder queryParams = new StringBuilder("?");
         queryParams.append("filterTypes=").append(filterType.name());
@@ -175,7 +173,7 @@ public class BackendServiceClientImpl implements BackendServiceClient {
         queryParams.append("&limit=").append(10);
         RequestBuilder reqBuilder = new RequestBuilder(RequestBuilder.GET, getBaseUrl() + "rest/secure/contacts/s" + queryParams.toString());
         reqBuilder.setHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE);
-        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(userId, token));
+        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(token));
         try {
             reqBuilder.sendRequest("", new RequestCallback() {
                 @Override
@@ -213,12 +211,12 @@ public class BackendServiceClientImpl implements BackendServiceClient {
     }
 
     @Override
-    public void addContact(Long userId, String token, Long contactId, final AsyncCallback<StatusResult> callback) {
+    public void addContact(String token, Long contactId, final AsyncCallback<StatusResult> callback) {
         StringBuilder urlPath = new StringBuilder("rest/secure/contact/");
         urlPath.append(contactId).append("/invite");
         RequestBuilder reqBuilder = new RequestBuilder(RequestBuilder.POST, getBaseUrl() + urlPath.toString());
         reqBuilder.setHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE);
-        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(userId, token));
+        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(token));
         try {
             reqBuilder.sendRequest("", new RequestCallback() {
                 @Override
@@ -252,12 +250,12 @@ public class BackendServiceClientImpl implements BackendServiceClient {
     }
 
     @Override
-    public void saveProfile(Long userId, String token, Profile profile, final AsyncCallback<StatusResult> callback) {
+    public void saveProfile(String token, Profile profile, final AsyncCallback<StatusResult> callback) {
         LOGGER.log(Level.INFO, "saveProfile called!");
         StringBuilder urlPath = new StringBuilder("rest/secure/profile");
         RequestBuilder reqBuilder = new RequestBuilder(RequestBuilder.POST, getBaseUrl() + urlPath.toString());
         reqBuilder.setHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE);
-        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(userId, token));
+        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(token));
         try {
             reqBuilder.sendRequest(format(PROFILE_REQ, profile.getFullname()), new RequestCallback() {
                 @Override
@@ -293,14 +291,14 @@ public class BackendServiceClientImpl implements BackendServiceClient {
         }
     }
 
-    public void getProfile(Long userId, String token, Long id, final AsyncCallback<ProfileResult> callback) {
+    public void getProfile(String token, Long id, final AsyncCallback<ProfileResult> callback) {
         LOGGER.log(Level.INFO, "getProfile called!");
         StringBuilder urlPath = new StringBuilder("rest/secure/profile/");
         urlPath.append(id).append("?filterType=FULL");
         LOGGER.log(Level.INFO, "getProfile URL:" + getBaseUrl() + urlPath.toString());
         RequestBuilder reqBuilder = new RequestBuilder(RequestBuilder.GET, getBaseUrl() + urlPath.toString());
         reqBuilder.setHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE);
-        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(userId, token));
+        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(token));
         try {
             reqBuilder.sendRequest("", new RequestCallback() {
                 @Override
@@ -340,13 +338,13 @@ public class BackendServiceClientImpl implements BackendServiceClient {
         }
     }
 
-    public void poll(Long userId, String token, final AsyncCallback<PollResult> callback) {
+    public void poll(String token, final AsyncCallback<PollResult> callback) {
         LOGGER.log(Level.INFO, "poll called!");
         StringBuilder urlPath = new StringBuilder("rest/secure/alerts/");
         LOGGER.log(Level.INFO, "poll URL:" + getBaseUrl() + urlPath.toString());
         RequestBuilder reqBuilder = new RequestBuilder(RequestBuilder.GET, getBaseUrl() + urlPath.toString());
         reqBuilder.setHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE);
-        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(userId, token));
+        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(token));
         try {
             reqBuilder.sendRequest("", new RequestCallback() {
                 @Override
@@ -388,13 +386,13 @@ public class BackendServiceClientImpl implements BackendServiceClient {
     }
 
     @Override
-    public void acceptInvite(Long userId, String token, Long id, final AsyncCallback<StatusResult> callback) {
+    public void acceptInvite(String token, Long id, final AsyncCallback<StatusResult> callback) {
         LOGGER.log(Level.INFO, "acceptInvite called!");
         StringBuilder urlPath = new StringBuilder("rest/secure/contact/invite/");
         urlPath.append(id).append("/accept");
         RequestBuilder reqBuilder = new RequestBuilder(RequestBuilder.POST, getBaseUrl() + urlPath.toString());
         reqBuilder.setHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE);
-        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(userId, token));
+        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(token));
         try {
             reqBuilder.sendRequest("", new RequestCallback() {
                 @Override
@@ -431,13 +429,13 @@ public class BackendServiceClientImpl implements BackendServiceClient {
     }
 
     @Override
-    public void denyInvite(Long userId, String token, Long id, final AsyncCallback<StatusResult> callback) {
+    public void denyInvite(String token, Long id, final AsyncCallback<StatusResult> callback) {
         LOGGER.log(Level.INFO, "denyInvite called!");
         StringBuilder urlPath = new StringBuilder("rest/secure/contact/invite/");
         urlPath.append(id).append("/deny");
         RequestBuilder reqBuilder = new RequestBuilder(RequestBuilder.POST, getBaseUrl() + urlPath.toString());
         reqBuilder.setHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE);
-        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(userId, token));
+        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(token));
         try {
             reqBuilder.sendRequest("", new RequestCallback() {
                 @Override
@@ -474,13 +472,13 @@ public class BackendServiceClientImpl implements BackendServiceClient {
     }
 
     @Override
-    public void removeContact(Long userId, String token, Long id, final AsyncCallback<StatusResult> callback) {
+    public void removeContact(String token, Long id, final AsyncCallback<StatusResult> callback) {
         LOGGER.log(Level.INFO, "removeContact called!");
         StringBuilder urlPath = new StringBuilder("rest/secure/contact/");
         urlPath.append(id);
         RequestBuilder reqBuilder = new RequestBuilder(RequestBuilder.DELETE, getBaseUrl() + urlPath.toString());
         reqBuilder.setHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE);
-        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(userId, token));
+        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(token));
         try {
             reqBuilder.sendRequest("", new RequestCallback() {
                 @Override
@@ -517,12 +515,12 @@ public class BackendServiceClientImpl implements BackendServiceClient {
     }
 
     @Override
-    public void send(Long userId, String token, Message message, final AsyncCallback<StatusResult> callback) {
+    public void send(String token, Message message, final AsyncCallback<StatusResult> callback) {
         LOGGER.log(Level.INFO, "send called!");
         StringBuilder urlPath = new StringBuilder("rest/secure/message");
         RequestBuilder reqBuilder = new RequestBuilder(RequestBuilder.POST, getBaseUrl() + urlPath.toString());
         reqBuilder.setHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE);
-        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(userId, token));
+        reqBuilder.setHeader("Authorization", getAuthorizationHeaderValue(token));
         try {
             reqBuilder.sendRequest(format(format(MESSAGE_REQ, message.getTo()), message.getText()), new RequestCallback() {
                 @Override
@@ -601,9 +599,9 @@ public class BackendServiceClientImpl implements BackendServiceClient {
         return null;
     }
 
-    private String getAuthorizationHeaderValue(Long userId, String token) {
-        StringBuilder authorization = new StringBuilder("Basic ");
-        authorization.append(Base64Coder.encodeString(String.valueOf(userId) + ":" + token));
+    private String getAuthorizationHeaderValue(String token) {
+        StringBuilder authorization = new StringBuilder("Custom ");
+        authorization.append(Base64Coder.encodeString(token));
         return authorization.toString();
     }
 }

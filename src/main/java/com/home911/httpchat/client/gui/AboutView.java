@@ -1,10 +1,7 @@
 package com.home911.httpchat.client.gui;
 
 import com.google.gwt.user.client.ui.Composite;
-import com.smartgwt.client.types.Alignment;
-import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.widgets.HTMLPane;
-import com.smartgwt.client.widgets.Img;
 import com.smartgwt.client.widgets.Window;
 import com.smartgwt.client.widgets.events.CloseClickEvent;
 import com.smartgwt.client.widgets.events.CloseClickHandler;
@@ -31,6 +28,8 @@ public class AboutView extends Composite {
         aboutWnd = new Window();
         aboutWnd.setTitle("HttpChat About");
         aboutWnd.centerInPage();
+        aboutWnd.setTop(-100);
+        aboutWnd.setLeft(aboutWnd.getLeft() - 100);
         aboutWnd.setWidth(320);
         aboutWnd.setHeight(180);
         aboutWnd.setCanDragResize(false);
@@ -45,11 +44,16 @@ public class AboutView extends Composite {
                 aboutWnd.hide();
             }
         });
+        aboutWnd.hide();
         initWidget(aboutWnd);
     }
 
     public void display() {
         LOGGER.log(Level.INFO, "Displaying about window...");
         aboutWnd.show();
+    }
+
+    public void hide() {
+        aboutWnd.hide();
     }
 }

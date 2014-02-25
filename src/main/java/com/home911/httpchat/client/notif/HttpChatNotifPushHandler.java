@@ -7,6 +7,7 @@ import com.home911.httpchat.client.gui.MainView;
 import com.home911.httpchat.client.gui.MessageView;
 import com.home911.httpchat.client.utils.ParserUtil;
 import com.home911.httpchat.shared.model.Contact;
+import com.home911.httpchat.shared.model.Presence;
 import com.home911.httpchat.shared.model.Push;
 
 import java.util.Map;
@@ -18,7 +19,6 @@ public class HttpChatNotifPushHandler implements HttpChatNotifHandler {
 
     private final MainView mainView;
     private String channelToken;
-    private Long userId;
     private String token;
     private Channel channel;
     private Socket socket;
@@ -32,7 +32,6 @@ public class HttpChatNotifPushHandler implements HttpChatNotifHandler {
         if (LOGGER.isLoggable(Level.INFO)) {
             LOGGER.log(Level.INFO, "Starting Push channel...");
         }
-        this.userId = (Long) params.get(USERID_PARAM);
         this.token = (String) params.get(TOKEN_PARAM);
         this.channelToken = (String) params.get(CHANNEL_TOKEN_PARAM);
 
@@ -72,20 +71,24 @@ public class HttpChatNotifPushHandler implements HttpChatNotifHandler {
                                             if (LOGGER.isLoggable(Level.INFO)) {
                                                 LOGGER.log(Level.INFO, "Presence update:" + push.getAlert().toString());
                                             }
-                                            mainView.getContactListView().updateContactInList((Contact) push.getAlert().getData());
+                                            Contact contact = (Contact) push.getAlert().getData();
+                                            mainView.getContactListView().updateContactInList(contact);
                                             if (LOGGER.isLoggable(Level.INFO)) {
                                                 LOGGER.log(Level.INFO, "Presence updated!");
+                                            }
+                                            if (Presence.OFFLINE == contact.getPresence()) {
+                                                mainView.disableConversation(contact.getId());
                                             }
                                             break;
                                     }
                                 } else if (push.getMessage() != null) {
                                     if (LOGGER.isLoggable(Level.INFO)) {
                                         LOGGER.log(Level.INFO, "Message received:" + push.getMessage().toString());
-                                        MessageView msgView = mainView.getConversation(userId, token,
-                                                push.getMessage().getFrom().getId(),
-                                                push.getMessage().getFrom().getName());
-                                        msgView.messageReceive(push.getMessage());
                                     }
+                                    MessageView msgView = mainView.getConversation(token,
+                                            push.getMessage().getFrom().getId(),
+                                            push.getMessage().getFrom().getName());
+                                    msgView.messageReceive(push.getMessage());
                                 }
                             } else {
                                 LOGGER.log(Level.WARNING, "HttpChat Push message discarded:empty");

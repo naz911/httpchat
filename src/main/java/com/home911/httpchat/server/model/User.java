@@ -16,7 +16,6 @@ public class User {
     @Index
     private String email;
     private Presence presence = Presence.OFFLINE;
-    private String token;
     private boolean activated = false;
     private boolean channelConnected;
 
@@ -68,14 +67,6 @@ public class User {
 
     public void setUserInfo(UserInfo userInfo) {
         this.userInfo = Ref.create(userInfo);
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getEmail() {

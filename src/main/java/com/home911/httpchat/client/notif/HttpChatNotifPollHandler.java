@@ -8,6 +8,7 @@ import com.home911.httpchat.client.model.PollResult;
 import com.home911.httpchat.shared.model.Alert;
 import com.home911.httpchat.shared.model.Contact;
 import com.home911.httpchat.shared.model.Message;
+import com.home911.httpchat.shared.model.Presence;
 
 import java.util.Map;
 import java.util.logging.Level;
@@ -17,7 +18,6 @@ public class HttpChatNotifPollHandler extends Timer implements HttpChatNotifHand
     private static final Logger LOGGER = Logger.getLogger(HttpChatNotifPollHandler.class.getName());
     private static final int RUN_DELAY = 30 * 1000;
 
-    private Long userId;
     private String token;
     private final MainView mainView;
 
@@ -29,7 +29,6 @@ public class HttpChatNotifPollHandler extends Timer implements HttpChatNotifHand
     }
 
     public void start(Map<String, Object> params) {
-        this.userId = (Long) params.get(USERID_PARAM);
         this.token = (String) params.get(TOKEN_PARAM);
         this.isStop = false;
         schedule(RUN_DELAY);
@@ -44,7 +43,7 @@ public class HttpChatNotifPollHandler extends Timer implements HttpChatNotifHand
         if (LOGGER.isLoggable(Level.INFO)) {
             LOGGER.log(Level.INFO, "Timer started...");
         }
-        this.mainView.getBackendService().poll(userId, token, new AsyncCallback<PollResult>() {
+        this.mainView.getBackendService().poll(token, new AsyncCallback<PollResult>() {
 
             @Override
             public void onFailure(Throwable throwable) {
@@ -74,9 +73,13 @@ public class HttpChatNotifPollHandler extends Timer implements HttpChatNotifHand
                                         if (LOGGER.isLoggable(Level.INFO)) {
                                             LOGGER.log(Level.INFO, "Presence update:" + alert.toString());
                                         }
-                                        mainView.getContactListView().updateContactInList((Contact) alert.getData());
+                                        Contact contact = (Contact) alert.getData();
+                                        mainView.getContactListView().updateContactInList(contact);
                                         if (LOGGER.isLoggable(Level.INFO)) {
                                             LOGGER.log(Level.INFO, "Presence updated!");
+                                        }
+                                        if (Presence.OFFLINE == contact.getPresence()) {
+                                            mainView.disableConversation(contact.getId());
                                         }
                                         break;
                                 }
@@ -86,11 +89,11 @@ public class HttpChatNotifPollHandler extends Timer implements HttpChatNotifHand
                             for (Message message : pollResult.getMessages()) {
                                 if (LOGGER.isLoggable(Level.INFO)) {
                                     LOGGER.log(Level.INFO, "Message received:" + message.toString());
-                                    MessageView msgView = mainView.getConversation(userId, token,
-                                            message.getFrom().getId(),
-                                            message.getFrom().getName());
-                                    msgView.messageReceive(message);
                                 }
+                                MessageView msgView = mainView.getConversation(token,
+                                        message.getFrom().getId(),
+                                        message.getFrom().getName());
+                                msgView.messageReceive(message);
                             }
                         }
                     } else {

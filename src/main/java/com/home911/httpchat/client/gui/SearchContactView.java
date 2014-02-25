@@ -44,19 +44,18 @@ public class SearchContactView extends Composite {
     private final MainView mainView;
     private final Window searchWnd;
     private final ListGrid contactsGrid;
-    private final Long userId;
     private final String token;
 
     private Label searchMsg;
 
-    public SearchContactView(MainView mainView, Long userId, String token) {
+    public SearchContactView(MainView mainView, String token) {
         this.mainView = mainView;
-        this.userId = userId;
         this.token = token;
         searchWnd = new Window();
         searchWnd.setTitle("HttpChat Search Contacts");
-        searchWnd.setTop(-600);
-        searchWnd.setLeft(300);
+        searchWnd.centerInPage();
+        searchWnd.setTop(-500);
+        searchWnd.setLeft(searchWnd.getLeft() - 100);
         searchWnd.setAutoSize(true);
         searchWnd.setCanDragResize(false);
         searchWnd.setShowCloseButton(true);
@@ -74,7 +73,7 @@ public class SearchContactView extends Composite {
         LOGGER.log(Level.INFO, "Creating...");
         contactsGrid = new ListGrid();
         createSearchWindow();
-
+        searchWnd.hide();
         initWidget(searchWnd);
     }
 
@@ -83,7 +82,7 @@ public class SearchContactView extends Composite {
     }
 
     public void hide() {
-        searchWnd.destroy();
+        searchWnd.hide();
     }
 
     private void createSearchWindow() {
@@ -180,7 +179,7 @@ public class SearchContactView extends Composite {
                 if (isError) {
                     searchMsg.setContents(errorMsg.toString());
                 } else {
-                    mainView.getBackendService().search(userId, token, filterValueItem.getEnteredValue().trim(),
+                    mainView.getBackendService().search(token, filterValueItem.getEnteredValue().trim(),
                             ContactFilterType.valueOf(filterTypeLst.getEnteredValue().trim()),
                             new AsyncCallback<ContactsResult>() {
                                 @Override
@@ -251,7 +250,7 @@ public class SearchContactView extends Composite {
                             contactRec.getAttribute("name"), Presence.OFFLINE);
                     public void execute(Boolean value) {
                         if (value != null && value) {
-                            mainView.getBackendService().addContact(userId, token, contact.getId(),
+                            mainView.getBackendService().addContact(token, contact.getId(),
                                     new AsyncCallback<StatusResult>() {
                                         @Override
                                         public void onFailure(Throwable throwable) {

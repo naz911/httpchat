@@ -7,20 +7,11 @@ import com.home911.httpchat.shared.model.Profile;
 import java.util.List;
 
 public class LoginResult extends StatusResult {
-    private Long userId;
     private String token;
     private String channelToken;
     private Profile profile;
     private List<Contact> contacts;
     private List<Alert> alerts;
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
 
     public String getToken() {
         return token;
@@ -65,8 +56,7 @@ public class LoginResult extends StatusResult {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("LoginResult{");
-        sb.append("userId=").append(userId);
-        sb.append(", token='").append(token).append('\'');
+        sb.append("token='").append(token).append('\'');
         sb.append(", channelToken='").append(channelToken).append('\'');
         sb.append(", profile=").append(profile);
         sb.append(", contacts=").append(contacts);

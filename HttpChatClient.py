@@ -108,9 +108,9 @@ class HttpChatClient(object):
         body = response.read()
         print response.status, response.reason, response.getheaders(), body;
         self.currentTokenA = response.getheader('x-httpchat-token')
-        self.currentUserIdA = response.getheader('x-httpchat-userid')
+        self.currentUserIdA = self.currentTokenA.split('|')[0]
         print 'generated token is:' + self.currentTokenA
-        print 'generated userid is:' + self.currentUserIdA
+        print 'extracted userId is:' + self.currentUserIdA
 
     def loginB(self):
         request = '{"username":"gringo","password":"qazwsx"}'
@@ -127,9 +127,9 @@ class HttpChatClient(object):
         body = response.read()
         print response.status, response.reason, response.getheaders(), body;
         self.currentTokenB = response.getheader('x-httpchat-token')
-        self.currentUserIdB = response.getheader('x-httpchat-userid')
+        self.currentUserIdB = self.currentTokenB.split('|')[0]
         print 'generated token is:' + self.currentTokenB
-        print 'generated userid is:' + self.currentUserIdB
+        print 'extracted userId is:' + self.currentUserIdB
 
     def saveProfileA(self):
         request = '{"fullname":"Benoit Houle"}'
@@ -139,7 +139,7 @@ class HttpChatClient(object):
                         request,
                         {
                             "Content-type" : "application/json",
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdA, self.currentTokenA))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenA))
                         }
                     ); 
 
@@ -154,7 +154,7 @@ class HttpChatClient(object):
         conn.request("GET", "/rest/secure/profile?filterType=FULL",
                         request,
                         {
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdA, self.currentTokenA))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenA))
                         }
                     ); 
 
@@ -170,7 +170,7 @@ class HttpChatClient(object):
                         request,
                         {
                             "Content-type" : "application/json",
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdB, self.currentTokenB))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenB))
                         }
                     ); 
 
@@ -185,7 +185,7 @@ class HttpChatClient(object):
         conn.request("GET", "/rest/secure/profile?filterType=FULL",
                         request,
                         {
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdB, self.currentTokenB))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenB))
                         }
                     ); 
 
@@ -200,7 +200,7 @@ class HttpChatClient(object):
         conn.request("GET", "/rest/secure/profile/%s?filterType=FULL" % (self.currentUserIdB),
                         request,
                         {
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdA, self.currentTokenA))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenA))
                         }
                     ); 
 
@@ -215,7 +215,7 @@ class HttpChatClient(object):
         conn.request("GET", "/rest/secure/profile/%s?filterType=FULL" % (self.currentUserIdA),
                         request,
                         {
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdB, self.currentTokenB))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenB))
                         }
                     ); 
 
@@ -229,7 +229,7 @@ class HttpChatClient(object):
         conn.request("GET", "/rest/secure/contacts/s?filterTypes=USERNAME&filterValue=grin&limit=10",
                         request,
                         {
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdA, self.currentTokenA))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenA))
                         }
                     ); 
 
@@ -247,7 +247,7 @@ class HttpChatClient(object):
         conn.request("GET", "/rest/secure/contacts/s?filterTypes=USERNAME&filterValue=bh&limit=10",
                         request,
                         {
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdB, self.currentTokenB))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenB))
                         }
                     ); 
 
@@ -265,7 +265,7 @@ class HttpChatClient(object):
         conn.request("POST", "/rest/secure/contact/%s/invite" % (str(self.invitedContactIdA)),
                         request,
                         {
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdA, self.currentTokenA))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenA))
                         }
                     ); 
 
@@ -280,7 +280,7 @@ class HttpChatClient(object):
         conn.request("GET", "/rest/secure/alerts",
                         request,
                         {
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdA, self.currentTokenA))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenA))
                         }
                     ); 
 
@@ -300,7 +300,7 @@ class HttpChatClient(object):
         conn.request("GET", "/rest/secure/alerts",
                         request,
                         {
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdB, self.currentTokenB))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenB))
                         }
                     ); 
 
@@ -320,7 +320,7 @@ class HttpChatClient(object):
         conn.request("POST", "/rest/secure/contact/invite/%s/accept" % (str(self.alertIdB)),
                         request,
                         {
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdB, self.currentTokenB))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenB))
                         }
                     ); 
 
@@ -335,7 +335,7 @@ class HttpChatClient(object):
         conn.request("GET", "/rest/secure/contacts",
                         request,
                         {
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdA, self.currentTokenA))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenA))
                         }
                     ); 
 
@@ -350,7 +350,7 @@ class HttpChatClient(object):
         conn.request("GET", "/rest/secure/contacts",
                         request,
                         {
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdB, self.currentTokenB))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenB))
                         }
                     ); 
 
@@ -366,7 +366,7 @@ class HttpChatClient(object):
                         request,
                         {
                             "Content-type" : "application/json",
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdA, self.currentTokenA))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenA))
                         }
                     ); 
 
@@ -382,7 +382,7 @@ class HttpChatClient(object):
                         request,
                         {
                             "Content-type" : "application/json",
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdB, self.currentTokenB))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenB))
                         }
                     ); 
 
@@ -397,7 +397,7 @@ class HttpChatClient(object):
         conn.request("DELETE", "/rest/secure/contact/%s" % (str(self.currentUserIdB)),
                         request,
                         {
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdA, self.currentTokenA))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenA))
                         }
                     ); 
 
@@ -412,7 +412,7 @@ class HttpChatClient(object):
         conn.request("POST", "/rest/secure/logout",
                         request,
                         {
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdA, self.currentTokenA))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenA))
                         }
                     ); 
 
@@ -427,7 +427,7 @@ class HttpChatClient(object):
         conn.request("POST", "/rest/secure/logout",
                         request,
                         {
-							"Authorization" : base64.b64encode("%s:%s" % (self.currentUserIdB, self.currentTokenB))
+							"Authorization" : base64.b64encode("%s" % (self.currentTokenB))
                         }
                     ); 
 
@@ -440,8 +440,8 @@ client.registerA()
 client.confirmRegisterA()
 client.registerB()
 client.confirmRegisterB()
-#client.loginA()
-#client.loginB()
+client.loginA()
+client.loginB()
 #client.saveProfileA()
 #client.getMyProfileA()
 #client.saveProfileB()
@@ -467,5 +467,5 @@ client.confirmRegisterB()
 #client.inviteContactA()
 #client.getContactsA()
 #client.getContactsB()
-#client.logoutA()
-#client.logoutB()
+client.logoutA()
+client.logoutB()

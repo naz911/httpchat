@@ -24,7 +24,6 @@ import org.jboss.resteasy.util.Base64;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -68,11 +67,10 @@ public class BusinessLogicImpl implements BusinessLogic {
                 throw new UserNotActivatedException();
             }
             // Successfull login
-            String token = generateToken(user.getUsername());
+            String token = generateToken(user.getId());
 
             // update his presence
             user.setPresence(Presence.ONLINE);
-            user.setToken(token);
 
             if (user.getUserInfo() == null) {
                 UserInfo userInfo = new UserInfo();
@@ -126,7 +124,7 @@ public class BusinessLogicImpl implements BusinessLogic {
 
             // generate login response
             LoginResponse resp = new LoginResponse(HttpStatus.SC_OK, "Login successful", token,
-                    user.getId(), profile, channelToken);
+                    profile, channelToken);
             resp.setContacts(ownContacts);
 
             // generate presence notifications
@@ -155,7 +153,6 @@ public class BusinessLogicImpl implements BusinessLogic {
         if (user != null) {
             // update his presence
             user.setPresence(Presence.OFFLINE);
-            user.setToken(null);
             user.setChannelConnected(false);
             userService.saveUser(user);
 
@@ -576,19 +573,10 @@ public class BusinessLogicImpl implements BusinessLogic {
         return contactSearchFilter;
     }
 
-    private String generateToken(String username) {
-        StringBuilder sb = new StringBuilder(username);
-        sb.append("|").append(System.currentTimeMillis());
-
-        try {
-            byte[] bytes = sb.toString().getBytes(UTF8);
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] digest = md.digest(bytes);
-            return Base64.encodeBytes(digest);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Unexpected exception.", e);
-            throw new ServerErrorException();
-        }
+    private String generateToken(long uid) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(uid).append("|").append(System.currentTimeMillis());
+        return sb.toString();
     }
 
     private String generateRegisterCode(User user) {

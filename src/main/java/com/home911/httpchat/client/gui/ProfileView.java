@@ -30,38 +30,37 @@ public class ProfileView extends Composite {
     private final Window profileWnd;
     private Label profileMsg;
 
-    private final Long userId;
     private final String token;
     private final Profile profile;
 
     public ProfileView(MainView mainView, Profile profile) {
-        this(mainView, profile, null, null);
+        this(mainView, profile, null);
     }
 
-    public ProfileView(MainView mainView, Profile profile, Long userId, String token) {
+    public ProfileView(MainView mainView, Profile profile, String token) {
         this.mainView = mainView;
-        this.userId = userId;
         this.token = token;
         this.profile = profile;
         profileWnd = new Window();
         profileWnd.setTitle("HttpChat Profile");
         profileWnd.setAutoSize(true);
-        profileWnd.setTop(-500);
-        profileWnd.setLeft(300);
+        profileWnd.centerInPage();
+        profileWnd.setTop(-300);
+        profileWnd.setLeft(profileWnd.getLeft() - 75);
         profileWnd.setCanDragResize(false);
         profileWnd.setShowCloseButton(true);
         profileWnd.setShowMaximizeButton(false);
         profileWnd.setShowMinimizeButton(false);
         profileWnd.setIsModal(true);
         profileWnd.setShowModalMask(true);
-        initWidget(profileWnd);
-
         profileWnd.addCloseClickHandler(new CloseClickHandler() {
             public void onCloseClick(CloseClickEvent event) {
                 hide();
             }
         });
         createProfileWindow();
+        initWidget(profileWnd);
+        profileWnd.hide();
     }
 
     public void display() {
@@ -85,7 +84,7 @@ public class ProfileView extends Composite {
 
         if (LOGGER.isLoggable(Level.INFO)) {
             LOGGER.log(Level.INFO, "Drawing profile form for profile[" + profile.toString() +
-                    "], with userid[" + userId + "] and token[" + token + "]");
+                    "], with token[" + token + "]");
         }
         final DynamicForm form = new DynamicForm();
         form.setAutoFocus(true);
@@ -98,7 +97,7 @@ public class ProfileView extends Composite {
         final TextItem fullnameItem = new TextItem();
         fullnameItem.setTitle("Fullname");
         fullnameItem.setValue(profile.getFullname());
-        if (userId != null && token != null) {
+        if (token != null) {
             fullnameItem.setRequired(true);
             fullnameItem.addKeyPressHandler(new KeyPressHandler() {
                 @Override
@@ -115,7 +114,7 @@ public class ProfileView extends Composite {
         form.setFields(new FormItem[] {fullnameItem});
         profileWnd.addItem(form);
 
-        if (userId != null && token != null) {
+        if (token != null) {
             HLayout buttons = new HLayout();
             buttons.setLayoutAlign(Alignment.CENTER);
             buttons.setHeight(30);
@@ -146,7 +145,7 @@ public class ProfileView extends Composite {
             profileMsg.setContents(errorMsg.toString());
         } else {
             profile.setFullname(fullnameItem.getEnteredValue().trim());
-            mainView.getBackendService().saveProfile(userId, token, profile, new AsyncCallback<StatusResult>() {
+            mainView.getBackendService().saveProfile(token, profile, new AsyncCallback<StatusResult>() {
                 @Override
                 public void onFailure(Throwable throwable) {
                     LOGGER.log(Level.SEVERE, "An unexpected error has occured.", throwable);

@@ -24,7 +24,7 @@ public class SecurityInterceptor implements ContainerRequestFilter {
     private static final Logger LOGGER = Logger.getLogger(SecurityInterceptor.class.getCanonicalName());
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final String AUTHENTICATION_SCHEME = "Basic";
+    private static final String AUTHENTICATION_SCHEME = "Custom";
     private static final String USERID_HEADER = "x-httpchat-userid";
     private static final String SECURE_PATH = "/secure/";
 
@@ -58,35 +58,41 @@ public class SecurityInterceptor implements ContainerRequestFilter {
             }
 
             //Get encoded userid:token
-            final String encodedUserIdToken = StringUtils.replaceOnce(authorization.get(0), AUTHENTICATION_SCHEME + " ", "");
-            if (StringUtils.isEmpty(encodedUserIdToken)) {
+            final String encodedToken = StringUtils.replaceOnce(authorization.get(0), AUTHENTICATION_SCHEME + " ", "");
+            if (StringUtils.isEmpty(encodedToken)) {
                 requestContext.abortWith(ACCESS_FORBIDDEN);
                 return;
             }
 
             try {
                 //Decode username and password
-                String userIdToken = new String(Base64.decode(encodedUserIdToken));
+                String token = new String(Base64.decode(encodedToken));
                 //Split username and password tokens
-                final StringTokenizer tokenizer = new StringTokenizer(userIdToken, ":");
+                final StringTokenizer tokenizer = new StringTokenizer(token, "|");
                 final String userId = tokenizer.nextToken();
-                final String token = tokenizer.nextToken();
+                final String ts = tokenizer.nextToken();
 
-                User user = userService.getUser(Long.valueOf(userId));
-
-                if (user == null) {
-                    requestContext.abortWith(ACCESS_FORBIDDEN);
-                } else if (Presence.OFFLINE == user.getPresence()) {
-                    requestContext.abortWith(GONE);
-                } else if (!StringUtils.equals(user.getToken(), token)) {
-                    requestContext.abortWith(ACCESS_DENIED);
+                if (isTimestampValid(ts)) {
+                    User user = userService.getUser(Long.valueOf(userId));
+                    if (user == null) {
+                        requestContext.abortWith(ACCESS_FORBIDDEN);
+                    } else if (Presence.OFFLINE == user.getPresence()) {
+                        requestContext.abortWith(GONE);
+                    } else {
+                        requestContext.getHeaders().add(USERID_HEADER, userId);
+                    }
                 } else {
-                    requestContext.getHeaders().add(USERID_HEADER, userId);
+                    requestContext.abortWith(ACCESS_DENIED);
                 }
+
             } catch (IOException e) {
                 requestContext.abortWith(ACCESS_DENIED);
             }
             return;
         }
+    }
+
+    private boolean isTimestampValid(String ts) {
+        return true;
     }
 }

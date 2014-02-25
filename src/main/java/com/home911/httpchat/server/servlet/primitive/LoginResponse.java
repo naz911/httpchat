@@ -11,12 +11,10 @@ public class LoginResponse extends StatusResponse {
     private List<Contact> contacts;
     private String channelToken;
     private transient String token;
-    private transient Long userId;
 
-    public LoginResponse(int code, String description, String token, Long userId, Profile profile, String channelToken) {
+    public LoginResponse(int code, String description, String token, Profile profile, String channelToken) {
         super(code, description);
         this.token = token;
-        this.userId = userId;
         this.profile = profile;
         this.channelToken = channelToken;
     }
@@ -43,14 +41,6 @@ public class LoginResponse extends StatusResponse {
 
     public void setToken(String token) {
         this.token = token;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
     }
 
     public String getChannelToken() {

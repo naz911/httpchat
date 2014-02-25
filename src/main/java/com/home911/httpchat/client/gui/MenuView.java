@@ -22,7 +22,6 @@ public class MenuView extends Composite {
     private IButton logoutBtn;
     private IButton profileBtn;
     private IButton searchBtn;
-    //private IButton alertsBtn;
     private IButton aboutBtn;
 
     public MenuView(MainView mainView) {
@@ -46,13 +45,12 @@ public class MenuView extends Composite {
         menuWindow.setStatus(status);
     }
 
-    public void adjustAfterLogin(Long userId, String token, Profile profile) {
+    public void adjustAfterLogin(String token, Profile profile) {
         menuWindow.removeItem(loginBtn);
         menuWindow.removeItem(aboutBtn);
-        addMyProfileMenu(userId, token, profile);
-        addSearchContactMenu(userId, token);
-        //addAlertsMenu(userId, token);
-        addLogoutMenu(userId, token);
+        addMyProfileMenu(token, profile);
+        addSearchContactMenu(token);
+        addLogoutMenu(token);
         addAboutMenu();
         menuWindow.draw();
     }
@@ -99,14 +97,13 @@ public class MenuView extends Composite {
                 if (LOGGER.isLoggable(Level.INFO)) {
                     LOGGER.log(Level.INFO, "About button clicked!...");
                 }
-                AboutView aboutView = new AboutView();
-                aboutView.display();
+                mainView.showAbout();
             }
         });
         menuWindow.addItem(aboutBtn);
     }
 
-    private void addLogoutMenu(final Long userId, final String token) {
+    private void addLogoutMenu(final String token) {
         logoutBtn = new IButton("Logout");
         logoutBtn.setShowRollOver(true);
         logoutBtn.setShowDisabled(true);
@@ -118,7 +115,7 @@ public class MenuView extends Composite {
                 if (LOGGER.isLoggable(Level.INFO)) {
                     LOGGER.log(Level.INFO, "Logout clicked!");
                 }
-                mainView.getBackendService().logout(userId,
+                mainView.getBackendService().logout(
                         token, new AsyncCallback<StatusResult>() {
                     @Override
                     public void onFailure(Throwable throwable) {
@@ -141,7 +138,7 @@ public class MenuView extends Composite {
         menuWindow.addItem(logoutBtn);
     }
 
-    private void addSearchContactMenu(final Long userId, final String token) {
+    private void addSearchContactMenu(final String token) {
         searchBtn = new IButton("Search Contacts");
         searchBtn.setShowRollOver(true);
         searchBtn.setShowDisabled(true);
@@ -153,14 +150,13 @@ public class MenuView extends Composite {
                 if (LOGGER.isLoggable(Level.INFO)) {
                     LOGGER.log(Level.INFO, "Search contacts clicked!");
                 }
-                SearchContactView searchView = new SearchContactView(mainView, userId, token);
-                searchView.display();
+                mainView.displaySearch(token);
             }
         });
         menuWindow.addItem(searchBtn);
     }
 
-    private void addMyProfileMenu(final Long userId, final String token, final Profile profile) {
+    private void addMyProfileMenu(final String token, final Profile profile) {
         profileBtn = new IButton("My Profile");
         profileBtn.setShowRollOver(true);
         profileBtn.setShowDisabled(true);
@@ -172,8 +168,7 @@ public class MenuView extends Composite {
                 if (LOGGER.isLoggable(Level.INFO)) {
                     LOGGER.log(Level.INFO, "My profile clicked!");
                 }
-                ProfileView profileView = new ProfileView(mainView, profile, userId, token);
-                profileView.display();
+                mainView.displayProfile(profile, token);
             }
         });
         menuWindow.addItem(profileBtn);

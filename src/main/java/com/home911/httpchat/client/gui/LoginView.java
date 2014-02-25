@@ -38,7 +38,8 @@ public class LoginView extends Composite {
         loginWnd = new Window();
         loginWnd.setTitle("HttpChat Login");
         loginWnd.centerInPage();
-        loginWnd.setTop(0);
+        loginWnd.setTop(-100);
+        loginWnd.setLeft(loginWnd.getLeft() - 100);
         loginWnd.setAutoSize(true);
         loginWnd.setCanDragResize(false);
         loginWnd.setShowCloseButton(true);
@@ -46,14 +47,14 @@ public class LoginView extends Composite {
         loginWnd.setShowMinimizeButton(false);
         loginWnd.setIsModal(true);
         loginWnd.setShowModalMask(true);
-        initWidget(loginWnd);
-
         loginWnd.addCloseClickHandler(new CloseClickHandler() {
             public void onCloseClick(CloseClickEvent event) {
                 hide();
             }
         });
         createLoginWindow();
+        loginWnd.hide();
+        initWidget(loginWnd);
     }
 
     public void display() {
@@ -61,7 +62,7 @@ public class LoginView extends Composite {
     }
 
     public void hide() {
-        loginWnd.destroy();
+        loginWnd.hide();
     }
 
     private void createLoginWindow() {
@@ -102,7 +103,6 @@ public class LoginView extends Composite {
 
         final CheckboxItem usePushChk = new CheckboxItem();
         usePushChk.setTitle("Use push?");
-        usePushChk.setDisabled(true);
 
         passwordItem.addKeyPressHandler(new KeyPressHandler() {
             @Override
@@ -159,7 +159,7 @@ public class LoginView extends Composite {
         boolean isError = false;
         if (LOGGER.isLoggable(Level.INFO)) {
             LOGGER.log(Level.INFO, "Form submitted with username[" + usernameItem.getEnteredValue().trim() + "]," +
-                    " password[" + passwordItem.getEnteredValue().trim() + "]," +
+                    " password[********]," +
                     "usePush[" + usePushChk.getValueAsBoolean() + "]");
         }
         if (usernameItem.getEnteredValue().trim() == "") {
@@ -197,9 +197,8 @@ public class LoginView extends Composite {
                         }
                         loginWnd.hide();
                         mainView.getMenuView().writeStatus(loginResult.getStatus().getDescription());
-                        mainView.login(loginResult.getUserId(), loginResult.getToken(), loginResult.getChannelToken());
-                        mainView.getMenuView().adjustAfterLogin(loginResult.getUserId(),
-                                loginResult.getToken(), loginResult.getProfile());
+                        mainView.login(loginResult.getToken(), loginResult.getChannelToken());
+                        mainView.getMenuView().adjustAfterLogin(loginResult.getToken(), loginResult.getProfile());
                         if (LOGGER.isLoggable(Level.INFO)) {
                             LOGGER.log(Level.INFO, "Populating contacts");
                         }

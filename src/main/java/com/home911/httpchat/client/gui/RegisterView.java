@@ -35,6 +35,8 @@ public class RegisterView extends Composite {
         registerWnd = new Window();
         registerWnd.setTitle("HttpChat Registration");
         registerWnd.centerInPage();
+        registerWnd.setTop(-300);
+        registerWnd.setLeft(registerWnd.getLeft() - 100);
         registerWnd.setAutoSize(true);
         registerWnd.setCanDragResize(false);
         registerWnd.setShowCloseButton(true);

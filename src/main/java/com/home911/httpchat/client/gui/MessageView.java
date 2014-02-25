@@ -27,21 +27,24 @@ public class MessageView extends Composite {
 
     private final Window messageWnd;
     private final HTMLPane messagePane;
+    private final DynamicForm form;
+    private final IButton sendBtn;
     private final MainView mainView;
 
     private final Long ownerId;
-    private final Long userId;
     private final String token;
 
-    public MessageView(MainView mainView, String title, Long ownerId, Long userId, String token) {
+    public MessageView(MainView mainView, String title, Long ownerId, String token) {
         this.mainView = mainView;
         this.ownerId = ownerId;
-        this.userId = userId;
         this.token = token;
         this.messagePane = new HTMLPane();
         messagePane.setWidth(300);
         messagePane.setHeight(200);
         messagePane.setPadding(5);
+
+        form = new DynamicForm();
+        sendBtn = new IButton("Send");
 
         messageWnd = new Window();
         messageWnd.setTitle(title);
@@ -70,7 +73,6 @@ public class MessageView extends Composite {
         layout.setWidth(300);
         layout.setHeight(25);
 
-        final DynamicForm form = new DynamicForm();
         form.setWidth(200);
         form.setHeight(20);
         form.setAutoFocus(true);
@@ -95,7 +97,6 @@ public class MessageView extends Composite {
         form.setFields(new FormItem[] {textItem});
         layout.addMember(form);
 
-        IButton sendBtn = new IButton("Send");
         sendBtn.setHeight(25);
         sendBtn.setWidth(100);
         sendBtn.setLayoutAlign(VerticalAlignment.CENTER);
@@ -116,7 +117,7 @@ public class MessageView extends Composite {
             final Message message = new Message();
             message.setTo(ownerId);
             message.setText(text);
-            mainView.getBackendService().send(userId, token, message,
+            mainView.getBackendService().send(token, message,
                     new AsyncCallback<StatusResult>() {
                         @Override
                         public void onFailure(Throwable throwable) {
@@ -163,5 +164,11 @@ public class MessageView extends Composite {
                     "<br />" + message.getText() + "</p>");
             this.messagePane.animateScroll(0, this.messagePane.getScrollBottom() + 100);
         }
+    }
+
+    public void disable() {
+        this.messageWnd.setTitle(messageWnd.getTitle() + " - OFFLINE");
+        form.disable();
+        sendBtn.disable();
     }
 }

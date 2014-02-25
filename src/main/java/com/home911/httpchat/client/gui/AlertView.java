@@ -36,7 +36,6 @@ public class AlertView extends Composite {
     private final Window alertWnd;
     private final ListGrid alertsGrid;
     private final AlertDataSource alertsDs;
-    private final Long userId;
     private final String token;
 
     private static class AlertDataSource extends DataSource {
@@ -70,16 +69,14 @@ public class AlertView extends Composite {
         }
     }
 
-    public AlertView(MainView mainView, Long userId, String token) {
+    public AlertView(MainView mainView, String token) {
         this.mainView = mainView;
-        this.userId = userId;
         this.token = token;
         alertWnd = new Window();
         alertWnd.setTitle("HttpChat Alerts");
         alertWnd.setAnimateMinimize(true);
         alertWnd.setAutoSize(true);
-        alertWnd.setTop(-500);
-        alertWnd.setLeft(480);
+        alertWnd.setLeft(490);
         alertWnd.setCanDragResize(false);
         alertWnd.setShowCloseButton(false);
         alertWnd.setShowMaximizeButton(false);
@@ -184,7 +181,7 @@ public class AlertView extends Composite {
                             contactRec.getAttribute("from"), Presence.valueOf(contactRec.getAttribute("fromPresence")));
                     public void execute(Boolean value) {
                         if (value != null && value) {
-                            mainView.getBackendService().acceptInvite(userId, token, contactRec.getAttributeAsLong("id"),
+                            mainView.getBackendService().acceptInvite(token, contactRec.getAttributeAsLong("id"),
                                     new AsyncCallback<StatusResult>() {
                                         @Override
                                         public void onFailure(Throwable throwable) {
@@ -216,7 +213,7 @@ public class AlertView extends Composite {
                 SC.confirm("Do you really want to deny this invite?", new BooleanCallback() {
                     public void execute(Boolean value) {
                         if (value != null && value) {
-                            mainView.getBackendService().denyInvite(userId, token, contactRec.getAttributeAsLong("id"),
+                            mainView.getBackendService().denyInvite(token, contactRec.getAttributeAsLong("id"),
                                     new AsyncCallback<StatusResult>() {
                                         @Override
                                         public void onFailure(Throwable throwable) {

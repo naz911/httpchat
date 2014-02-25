@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 public class LoginResource {
     private static final Logger LOGGER = Logger.getLogger(LoginResource.class.getCanonicalName());
     private static final String TOKEN_HEADER = "x-httpchat-token";
-    private static final String USERID_HEADER = "x-httpchat-userid";
 
     private final BusinessLogic businessLogic;
 
@@ -48,10 +47,9 @@ public class LoginResource {
             ResponseEvent<LoginResponse> respEvent =
                     businessLogic.processLogin(new RequestEvent<LoginRequest>(request));
             resp = respEvent.getResponse();
-            userid = ((LoginResponse)resp).getUserId();
             token = ((LoginResponse)resp).getToken();
         }
 
-        return Response.ok(resp).header(TOKEN_HEADER, token).header(USERID_HEADER, userid).build();
+        return Response.ok(resp).header(TOKEN_HEADER, token).build();
     }
 }
