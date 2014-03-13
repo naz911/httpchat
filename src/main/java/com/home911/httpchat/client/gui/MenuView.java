@@ -35,6 +35,7 @@ public class MenuView extends Composite {
         menuWindow.setCanDragReposition(false);
         menuWindow.setCanDrag(false);
         menuWindow.setShowFooter(true);
+        menuWindow.setZIndex(32000);
         initWidget(menuWindow);
 
         addLoginMenu();
@@ -78,8 +79,7 @@ public class MenuView extends Composite {
                 if (LOGGER.isLoggable(Level.INFO)) {
                     LOGGER.log(Level.INFO, "Login button clicked!...");
                 }
-                LoginView loginView = new LoginView(mainView);
-                loginView.display();
+                mainView.showLogin();
             }
         });
         menuWindow.addItem(loginBtn);

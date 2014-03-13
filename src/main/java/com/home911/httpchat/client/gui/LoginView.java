@@ -32,6 +32,7 @@ public class LoginView extends Composite {
     private final MainView mainView;
     private final Window loginWnd;
     private Label loginMsg;
+    private DynamicForm form;
 
     public LoginView(MainView mainView) {
         this.mainView = mainView;
@@ -195,7 +196,7 @@ public class LoginView extends Composite {
                         if (LOGGER.isLoggable(Level.INFO)) {
                             LOGGER.log(Level.INFO, "loginResult is success.");
                         }
-                        loginWnd.hide();
+                        hide();
                         mainView.getMenuView().writeStatus(loginResult.getStatus().getDescription());
                         mainView.login(loginResult.getToken(), loginResult.getChannelToken());
                         mainView.getMenuView().adjustAfterLogin(loginResult.getToken(), loginResult.getProfile());

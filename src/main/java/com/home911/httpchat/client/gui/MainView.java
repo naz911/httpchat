@@ -25,6 +25,7 @@ public class MainView extends Composite {
 
     private ContactListView contactListView;
     private AlertView alertsView;
+    private LoginView loginView;
     private HttpChatNotifHandler notifHandler;
     private Map<Long, MessageView> conversations = new HashMap<Long, MessageView>();
 
@@ -35,8 +36,8 @@ public class MainView extends Composite {
         this.loadingView = new LoadingView();
         this.aboutView = new AboutView();
         this.canvas = new Canvas();
-        this.canvas.setWidth100();
-        this.canvas.setHeight100();
+        //this.canvas.setWidth100();
+        //this.canvas.setHeight100();
         this.menuView = new MenuView(this);
 
         canvas.addChild(this.menuView);
@@ -142,6 +143,7 @@ public class MainView extends Composite {
         contactListView = null;
         alertsView.hide();
         alertsView = null;
+        loginView = null;
         for (MessageView msgView : conversations.values()) {
             msgView.hide();
         }
@@ -167,5 +169,12 @@ public class MainView extends Composite {
         if (this.notifHandler != null) {
             this.notifHandler.stop();
         }
+    }
+
+    public void showLogin() {
+        if (loginView == null) {
+            loginView = new LoginView(this);
+        }
+        loginView.display();
     }
 }
